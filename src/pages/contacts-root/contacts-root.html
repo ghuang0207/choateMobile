@@ -1,0 +1,21 @@
+<ion-menu [content]="content" id="contactsMenu" persistent="true">
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Departments</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <button menuClose ion-item (click)="getDepartmentMembers('Fav')">My Contacts</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('IT')">Information Technologies</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('HR')">Human Resources</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('FS')">Financial Services</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('LIT')">Litigation</button>
+  </ion-list>
+</ion-content>
+
+</ion-menu>
+
+<ion-nav [root]="rootPage"  #content swipeBackEnabled="false"></ion-nav>
+
