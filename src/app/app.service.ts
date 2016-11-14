@@ -7,7 +7,7 @@ import {SQLite} from "ionic-native"; // for SQLite
 //import 'rxjs/add/operator/map';
 //import 'rxjs/add/operator/catch';
 
-
+// test
 @Injectable()
 export class AppService {
     employees : any = [];
