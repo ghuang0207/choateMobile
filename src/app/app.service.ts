@@ -4,6 +4,7 @@ import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 import {SQLite} from "ionic-native"; // for SQLite
 
+
 //import 'rxjs/add/operator/map';
 //import 'rxjs/add/operator/catch';
 
@@ -26,43 +27,67 @@ export class AppService {
     public database: SQLite = null;
     public favoritPeople: any = [];
 
-    private InitSQLite(){
-        this.database = new SQLite();
-        this.database.openDatabase({name: "data.db", location: "default"}).then(() => {
-            //this.getFavoritPeopleList();
+    public addPersonToFavorit(person){
+      console.log(person);
+       let db = new SQLite();
+       db.openDatabase({name: "data.db", location: "default"}).then(() => {
+         
+            db.executeSql("SELECT tkid FROM people WHERE tkid=(?)", [person.tkid]).then((data) => {
+            if(data.rows.length > 0) {
+                db.executeSql(`DELETE FROM 
+                        people WHERE tkid=(?)
+                        `, [person.tkid]).then((data) => {
+                            console.log("INSERTED: " + JSON.stringify(data));
+                        }, (error) => {
+                            console.log("ERROR: " + JSON.stringify(error));
+                });
+            }
+            else{
+                db.executeSql(`INSERT INTO 
+                    people (tkid,fullName,email,department,jobTitle,extension,altPhone) 
+                        VALUES (?,?,?,?,?,?,?)
+                    `, [person.tkid,person.fullName,person.email,person.department,person.jobTitle,person.extension,person.altPhone]).then((data) => {
+                        console.log("INSERTED: " + JSON.stringify(data));
+                    }, (error) => {
+                        console.log("ERROR: " + JSON.stringify(error));
+                });
+
+        }
+        },
+            (error) => {console.log(error);}
+            )
+            //console.log("transaction 2: "+ person.tkid);
+
+            
+            
         }, (error) => {
-            console.log("ERROR: ", error);
+            console.error("Unable to open database", error);
         });
-        
-    }
-    public addPersonToFavorit(tkid){
-       if(this.database==null){
-          this.InitSQLite();
-       }
+        /*
        this.database.executeSql("INSERT INTO people (tkid) VALUES (tkid)", []).then((data) => {
             console.log("INSERTED: " + JSON.stringify(data));
         }, (error) => {
-            console.log("ERROR: " + JSON.stringify(error.err));
-        });
+            console.log("ERROR: " + JSON.stringify(error));
+        });*/
     }
 
     public removePersonFromFavorit(tkid){
-        if(this.database==null){
+        /*if(this.database==null){
           this.InitSQLite();
         }
         this.database.executeSql("DELETE FROM people WHERE tkid = (tkid)", []).then((data) => {
             console.log("removed: " + JSON.stringify(data));
         }, (error) => {
             console.log("ERROR: " + JSON.stringify(error.err));
-        });
+        });*/
     }
 
     public getFavoritPeopleList(){
-       if(this.database==null){
-          this.InitSQLite();
-        }
-        this.favoritPeople = [];
-        this.database.executeSql("SELECT * FROM people", []).then((data) => {
+       let db = new SQLite();
+       this.favoritPeople = [];
+       db.openDatabase({name: "data.db", location: "default"}).then(() => {
+          db.executeSql("SELECT * FROM people", []).then((data) => {
+            console.log(data);
             if(data.rows.length > 0) {
                 for(var i = 0; i < data.rows.length; i++) {
                     this.favoritPeople.push({tkid: data.rows.item(i).tkid});
@@ -71,6 +96,18 @@ export class AppService {
         }, (error) => {
             console.log("ERROR: " + JSON.stringify(error));
         });
+         },
+       (error) => {console.log(error)});
+        
+        /*this.database.executeSql("SELECT * FROM people", []).then((data) => {
+            if(data.rows.length > 0) {
+                for(var i = 0; i < data.rows.length; i++) {
+                    this.favoritPeople.push({tkid: data.rows.item(i).tkid});
+                }
+            }
+        }, (error) => {
+            console.log("ERROR: " + JSON.stringify(error));
+        });*/
         return this.favoritPeople;
     }
     // end SQLite section for favorit contacts

@@ -16,15 +16,25 @@ export class MyApp {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       StatusBar.styleDefault();
-      Splashscreen.hide();
+      //Splashscreen.hide();
 
       // init SQLite
+      debugger;
+      
       let db = new SQLite();
         db.openDatabase({
             name: "data.db",
             location: "default"
         }).then(() => {
-            db.executeSql("CREATE TABLE IF NOT EXISTS people (tkid TEXT)", {}).then((data) => {
+            db.executeSql(`CREATE TABLE IF NOT EXISTS people (
+                tkid TEXT PRIMARY KEY, 
+                department TEXT,
+                fullName Text,
+                jobTitle TEXT,
+                extension TEXT,
+                email TEXT,
+                altPhone TEXT
+            )`, {}).then((data) => {
                 console.log("TABLE CREATED: ", data);
             }, (error) => {
                 console.error("Unable to execute sql", error);

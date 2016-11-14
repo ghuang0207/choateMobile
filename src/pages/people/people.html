@@ -21,7 +21,7 @@
                 <ion-item-sliding #SlideItem>
                     <ion-item>
                         <ion-thumbnail item-left>
-                            <img src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{item.tkid}}.jpg" onerror="this.src='https://azlabchoatestore.blob.core.windows.net/person-photo/noPhoto.jpg'"/> 
+                            <img src="https://azlabchoatestore.blob.core.windows.net/person-photo/noPhoto.jpg" onerror="this.src='https://azlabchoatestore.blob.core.windows.net/person-photo/noPhoto.jpg'"/> 
                         </ion-thumbnail>
                         <strong>{{item.fullName}}</strong><br/>
                         <span style="font-size:0.8em;">
@@ -31,8 +31,8 @@
                         </span>
                     </ion-item>
                     <ion-item-options side="left">
-                        <button ion-button (click)="favorite(item.tkid)">
-                        <ion-icon name="heart"></ion-icon>
+                        <button ion-button (click)="favorite(item)">
+                        <ion-icon name="{{item.isFavorite}}"></ion-icon>
                         Favorite
                         </button> <!---->
                     </ion-item-options>

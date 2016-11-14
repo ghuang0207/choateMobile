@@ -40,9 +40,11 @@ export class PeoplePage {
         
         
     }
-    favorite(tkid){
-        this.appService.addPersonToFavorit(tkid);
+    favorite(item){
+        this.appService.addPersonToFavorit(item);
     }
+
+
 
     call(number){
         let tempNumber: string = number;
@@ -65,6 +67,6 @@ export class PeoplePage {
     }
 
   itemSelected(item){
-      console.log(item);
+      //console.log(item);
   }
 }

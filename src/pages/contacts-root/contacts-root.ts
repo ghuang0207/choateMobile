@@ -3,6 +3,7 @@ import { Nav, LoadingController , NavController, MenuController } from 'ionic-an
 import { AppService } from '../../app/app.service';
 
 import {PeoplePage} from '../people/people';
+import {SQLite} from "ionic-native";
 
 /*
   Generated class for the ContactsRoot page.
@@ -35,8 +36,36 @@ export class ContactsRoot {
   getDepartmentMembers(deptCode : string){
     if(deptCode=="Fav"){
 
-      let emps = this.appService.getFavorites();
-      this.nav.setRoot(PeoplePage,emps);
+      //let emps = this.appService.getFavorites();
+
+      let db = new SQLite();
+       
+       db.openDatabase({name: "data.db", location: "default"}).then(() => {
+          db.executeSql("SELECT * FROM people", []).then((data) => {
+            console.log(data);
+            if(data.rows.length > 0) {
+              let emps=[];
+                for(var i = 0; i < data.rows.length; i++) {
+                    emps.push({
+                      tkid: data.rows.item(i).tkid,
+                      fullName: data.rows.item(i).fullName,
+                      department: data.rows.item(i).department,
+                      jobTitle: data.rows.item(i).jobTitle,
+                      extension: data.rows.item(i).extension,
+                      altPhone: data.rows.item(i).altPhone,
+                      email: data.rows.item(i).email
+                    });
+                }
+                console.log(emps);
+                this.nav.setRoot(PeoplePage,emps);
+            }
+        }, (error) => {
+            console.log("ERROR: " + JSON.stringify(error));
+        });
+         },
+       (error) => {console.log(error)});
+
+      //this.nav.setRoot(PeoplePage,emps);
     }
     else{
         let emps = this.appService.getDepartmentMembers(deptCode);
