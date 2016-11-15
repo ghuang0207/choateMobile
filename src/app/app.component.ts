@@ -33,9 +33,17 @@ export class MyApp {
                 jobTitle TEXT,
                 extension TEXT,
                 email TEXT,
+                deptCode TEXT,
                 altPhone TEXT
             )`, {}).then((data) => {
-                console.log("TABLE CREATED: ", data);
+                console.log("People TABLE CREATED: ", data);
+            }, (error) => {
+                console.error("Unable to execute sql", error);
+            });
+            db.executeSql(`CREATE TABLE IF NOT EXISTS favorites (
+                tkid TEXT PRIMARY KEY
+            )`, {}).then((data) => {
+                console.log("Fav TABLE CREATED: ", data);
             }, (error) => {
                 console.error("Unable to execute sql", error);
             })

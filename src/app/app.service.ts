@@ -27,12 +27,13 @@ export class AppService {
     public database: SQLite = null;
     public favoritPeople: any = [];
 
+
     public addPersonToFavorit(person){
       console.log(person);
        let db = new SQLite();
        db.openDatabase({name: "data.db", location: "default"}).then(() => {
          
-            db.executeSql("SELECT tkid FROM people WHERE tkid=(?)", [person.tkid]).then((data) => {
+           /* db.executeSql("SELECT tkid FROM people WHERE tkid=(?)", [person.tkid]).then((data) => {
             if(data.rows.length > 0) {
                 db.executeSql(`DELETE FROM 
                         people WHERE tkid=(?)
@@ -50,7 +51,26 @@ export class AppService {
                         console.log("INSERTED: " + JSON.stringify(data));
                     }, (error) => {
                         console.log("ERROR: " + JSON.stringify(error));
-                });
+                });*/
+                db.executeSql("SELECT tkid FROM favorites WHERE tkid=(?)", [person.tkid]).then((data) => {
+                    if(data.rows.length > 0) {
+                        db.executeSql(`DELETE FROM 
+                                people WHERE tkid=(?)
+                                `, [person.tkid]).then((data) => {
+                                    console.log("Deleted: " + JSON.stringify(data));
+                                }, (error) => {
+                                    console.log("ERROR: " + JSON.stringify(error));
+                        });
+                    }
+                    else{
+                        db.executeSql(`INSERT INTO 
+                            favorites (tkid) 
+                                VALUES (?)
+                            `, [person.tkid]).then((data) => {
+                                console.log("INSERTED: " + JSON.stringify(data));
+                            }, (error) => {
+                                console.log("ERROR: " + JSON.stringify(error));
+                        });
 
         }
         },
@@ -82,34 +102,6 @@ export class AppService {
         });*/
     }
 
-    public getFavoritPeopleList(){
-       let db = new SQLite();
-       this.favoritPeople = [];
-       db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT * FROM people", []).then((data) => {
-            console.log(data);
-            if(data.rows.length > 0) {
-                for(var i = 0; i < data.rows.length; i++) {
-                    this.favoritPeople.push({tkid: data.rows.item(i).tkid});
-                }
-            }
-        }, (error) => {
-            console.log("ERROR: " + JSON.stringify(error));
-        });
-         },
-       (error) => {console.log(error)});
-        
-        /*this.database.executeSql("SELECT * FROM people", []).then((data) => {
-            if(data.rows.length > 0) {
-                for(var i = 0; i < data.rows.length; i++) {
-                    this.favoritPeople.push({tkid: data.rows.item(i).tkid});
-                }
-            }
-        }, (error) => {
-            console.log("ERROR: " + JSON.stringify(error));
-        });*/
-        return this.favoritPeople;
-    }
     // end SQLite section for favorit contacts
 
     public getPeople() {
@@ -157,7 +149,7 @@ export class AppService {
       return tempEmployees;
     }
 
-    public getFavorites(){
+    /*public getFavorites(){
       let tempEmployees = [];
       let favTKIDs = this.getFavoritPeopleList();
       if (favTKIDs.length > 0)
@@ -172,7 +164,7 @@ export class AppService {
                 return true;
         }
         return false;
-    }
+    }*/
 
     /*private extractData(res: Response) {
 
