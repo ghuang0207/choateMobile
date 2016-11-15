@@ -21,35 +21,15 @@ export class MyApp {
       // init SQLite
       debugger;
       
-      let db = new SQLite();
+      /*let db = new SQLite();
         db.openDatabase({
             name: "data.db",
             location: "default"
         }).then(() => {
-            db.executeSql(`CREATE TABLE IF NOT EXISTS people (
-                tkid TEXT PRIMARY KEY, 
-                department TEXT,
-                fullName Text,
-                jobTitle TEXT,
-                extension TEXT,
-                email TEXT,
-                deptCode TEXT,
-                altPhone TEXT
-            )`, {}).then((data) => {
-                console.log("People TABLE CREATED: ", data);
-            }, (error) => {
-                console.error("Unable to execute sql", error);
-            });
-            db.executeSql(`CREATE TABLE IF NOT EXISTS favorites (
-                tkid TEXT PRIMARY KEY
-            )`, {}).then((data) => {
-                console.log("Fav TABLE CREATED: ", data);
-            }, (error) => {
-                console.error("Unable to execute sql", error);
-            })
+            
         }, (error) => {
             console.error("Unable to open database", error);
-        });
+        });*/
 
     });
   }

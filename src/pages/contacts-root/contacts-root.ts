@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav, LoadingController , NavController, MenuController } from 'ionic-angular';
+import { Nav, LoadingController , NavController, MenuController, Platform } from 'ionic-angular';
 import { AppService } from '../../app/app.service';
 
 import {PeoplePage} from '../people/people';
@@ -24,38 +24,68 @@ export class ContactsRoot {
   loadingComplete:any = 0;
 
   rootPage: any = PeoplePage;
-  constructor(private menuCtrl: MenuController ,public navCtrl: NavController, private appService: AppService, public loadingCtrl:LoadingController) {
-    let loader = loadingCtrl.create();
-    loader.present();
+  constructor(public platform: Platform, private menuCtrl: MenuController ,public navCtrl: NavController, private appService: AppService, public loadingCtrl:LoadingController) {
+    //let loader = loadingCtrl.create();
+    //loader.present();
     /*this.appService.getPeople().subscribe(
                        employee  => { this.employees=employee; loader.dismiss(); this.loadingComplete = 1;},
                        error =>  this.errorMessage = <any>error);*/
-    let db = new SQLite();
-    db.openDatabase({name: "data.db", location: "default"}).then(() => { 
-      db.executeSql("SELECT tkid from people",[]).then((data) =>{
-        if(data.rows.length == 0)
-          this.refreshSqliteDb();
-        else
-          this.loadData(db);
+    platform.ready().then(() => {
+      let db = new SQLite();
+      db.openDatabase({name: "data.db", location: "default"}).then(() => { 
+        db.executeSql(`CREATE TABLE IF NOT EXISTS people (
+                tkid TEXT PRIMARY KEY, 
+                department TEXT,
+                fullName Text,
+                jobTitle TEXT,
+                extension TEXT,
+                email TEXT,
+                departmentCode TEXT,
+                altPhone TEXT
+            )`, {}).then((data) => {
+                console.log("People TABLE CREATED: ", data);
+            }, (error) => {
+                console.error("Unable to execute sql", error);
+            });
+            db.executeSql(`CREATE TABLE IF NOT EXISTS favorites (
+                tkid TEXT PRIMARY KEY
+            )`, {}).then((data) => {
+                console.log("Fav TABLE CREATED: ", data);
+            }, (error) => {
+                console.error("Unable to execute sql", error);
+            })
+        db.executeSql("SELECT tkid from people",[]).then((data) =>{
+          console.log('init data',data);
+          if(data.rows.length == 0)
+            {
+              //console.log("data from server");
+              this.refreshSqliteDb(db);
+            }
+          else{
+            console.log("data from db");
+            this.loadData(db);
+          }
+          },
+            (error) =>{console.log("Error");});
         },
-          (error) =>{console.log("Error");});
-      },
-          //open db error
-        (error) => {console.log(error)});
-    loader.dismiss();
-    this.loadingComplete = 1;
+            //open db error
+          (error) => {console.log(error)});
+    //loader.dismiss();
+      this.loadingComplete = 1;
+    });
     
   }
   loadData(db){
     db.executeSql("SELECT * from people",[]).then((data) =>{
           this.employees = [];
+          console.log("data from db - loaddata ", data);
             for(var i = 0; i < data.rows.length; i++) {
                 this.employees.push({
                   tkid: data.rows.item(i).tkid,
                   fullName: data.rows.item(i).fullName,
                   department: data.rows.item(i).department,
                   jobTitle: data.rows.item(i).jobTitle,
-                  deptCode: data.rows.item(i).deptCode,
+                  departmentCode: data.rows.item(i).departmentCode,
                   extension: data.rows.item(i).extension,
                   altPhone: data.rows.item(i).altPhone,
                   email: data.rows.item(i).email
@@ -65,10 +95,10 @@ export class ContactsRoot {
           (error) =>{console.log("Error");});
   }
 
-  refreshSqliteDb(){
-      let db = new SQLite();
+  refreshSqliteDb(db){
+      //let db = new SQLite();
        
-       db.openDatabase({name: "data.db", location: "default"}).then(() => {
+       //db.openDatabase({name: "data.db", location: "default"}).then(() => {
               this.appService.getPeople().subscribe(
                 employees  => {
                   this.employees = employees;
@@ -82,17 +112,17 @@ export class ContactsRoot {
                   });},
                   //Service error
                 error =>  this.errorMessage = <any>error);
-          },
+      //    },
           //open db error
-        (error) => {console.log(error)});
+       // (error) => {console.log(error)});
   }
 
 
   loadDataIntoSqlite(person, db){
       db.executeSql(`INSERT INTO 
-                    people (tkid,fullName,email,department,jobTitle,extension,altPhone,deptCode) 
+                    people (tkid,fullName,email,department,jobTitle,extension,altPhone,departmentCode) 
                         VALUES (?,?,?,?,?,?,?,?)
-                    `, [person.tkid,person.fullName,person.email,person.department,person.jobTitle,person.extension,person.altPhone,person.deptCode]).then((data) => {
+                    `, [person.tkid,person.fullName,person.email,person.department,person.jobTitle,person.extension,person.altPhone,person.departmentCode]).then((data) => {
                         console.log("INSERTED: " + JSON.stringify(data));
                     }, (error) => {
                         console.log("ERROR: " + JSON.stringify(error));
@@ -108,7 +138,7 @@ export class ContactsRoot {
       let db = new SQLite();
        
        db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT people.tkid,people.fullName, people.extension, people.email,people.altPhone,people.jobTitle,people.department,people.deptCode FROM favorites JOIN people ON favorites.tkid = people.tkid", []).then((data) => {
+          db.executeSql("SELECT people.tkid,people.fullName, people.extension, people.email,people.altPhone,people.jobTitle,people.department,people.departmentCode FROM favorites JOIN people ON favorites.tkid = people.tkid", []).then((data) => {
             console.log(data);
             if(data.rows.length > 0) {
               let emps=[];
@@ -118,7 +148,7 @@ export class ContactsRoot {
                       fullName: data.rows.item(i).fullName,
                       department: data.rows.item(i).department,
                       jobTitle: data.rows.item(i).jobTitle,
-                      deptCode:data.rows.item(i).deptCode,
+                      departmentCode:data.rows.item(i).departmentCode,
                       extension: data.rows.item(i).extension,
                       altPhone: data.rows.item(i).altPhone,
                       email: data.rows.item(i).email
@@ -140,7 +170,7 @@ export class ContactsRoot {
       let db = new SQLite();
        
       db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT * FROM people WHERE deptCode = (?)", [deptCode]).then((data) => {
+          db.executeSql("SELECT * FROM people WHERE departmentCode = (?)", [deptCode]).then((data) => {
             console.log(data);
             if(data.rows.length > 0) {
               let emps=[];
@@ -150,7 +180,7 @@ export class ContactsRoot {
                       fullName: data.rows.item(i).fullName,
                       department: data.rows.item(i).department,
                       jobTitle: data.rows.item(i).jobTitle,
-                      deptCode:data.rows.item(i).deptCode,
+                      departmentCode:data.rows.item(i).departmentCode,
                       extension: data.rows.item(i).extension,
                       altPhone: data.rows.item(i).altPhone,
                       email: data.rows.item(i).email
@@ -176,7 +206,9 @@ export class ContactsRoot {
 
   ionViewDidLoad() {
     console.log('Hello ContactsRoot Page');
-    
+    this.platform.ready().then(() => {
+      this.getDepartmentMembers('Fav');
+    });
   }
 
   ionViewDidEnter(){

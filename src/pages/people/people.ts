@@ -60,10 +60,10 @@ export class PeoplePage {
     }
     
   ionViewDidLoad() {
-      if (!this.navParams.data.length)
+      /*if (!this.navParams.data.length)
         this.appService.getPeople().subscribe(
                        employee  => { this.employees=employee;},
-                       error =>  this.errorMessage = <any>error);
+                       error =>  this.errorMessage = <any>error);*/
     }
 
   itemSelected(item){
