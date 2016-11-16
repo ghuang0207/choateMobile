@@ -11,9 +11,9 @@
     <ion-searchbar placeholder="Search Contacts" [(ngModel)]="searchTerm">
     </ion-searchbar>
     <ion-list>
-        <ion-card *ngIf="employees.length == 0 && loadingComplete == 1">
+        <ion-card *ngIf="employees.length == 0 && !hasFavorites">
             <ion-card-content>
-                No Data to Display here.
+                You have not added any favorites yet.
             </ion-card-content>
         </ion-card>
         <ion-card *ngFor="let item of employees" (click)="itemSelected(item)">
@@ -32,7 +32,8 @@
                     </ion-item>
                     <ion-item-options side="left">
                         <button ion-button (click)="favorite(item)">
-                        <ion-icon name="{{item.isFavorite}}"></ion-icon>
+                        <ion-icon name="heart" *ngIf="item.isFavorite == 1"></ion-icon>
+                        <ion-icon name="heart-outline" *ngIf="item.isFavorite != 1"></ion-icon>
                         Favorite
                         </button> <!---->
                     </ion-item-options>

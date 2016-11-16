@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 //import { RequestOptions, Request, Response, RequestMethod, Headers, Http, URLSearchParams } from '@angular/http';
-import { Http, Response } from '@angular/http';
+import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 import {SQLite} from "ionic-native"; // for SQLite
 

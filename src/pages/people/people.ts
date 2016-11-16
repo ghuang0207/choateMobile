@@ -26,16 +26,23 @@ export class PeoplePage {
         employees: any = [];
         errorMessage: any;
         loadingComplete = 0;
+        hasFavorites: boolean = true;
 
   constructor(private menuCtrl: MenuController  ,public navCtrl: NavController, public appService: AppService, private navParams: NavParams ) {
       if (navParams.data.length){
-        if(navParams.data.length > 0)
+        if(navParams.data.length > 0){
             this.employees = navParams.data;
-        else
+            this.hasFavorites = true;    
+        }
+            
+        else{
             this.loadingComplete = 1;
+            this.hasFavorites = false;
+        }
       }
       else{
           this.employees= [];
+          this.hasFavorites = false;
       }
         
         
