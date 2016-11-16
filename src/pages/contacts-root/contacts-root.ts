@@ -22,17 +22,21 @@ export class ContactsRoot {
   errorMessage: any;
   favTKIDs:any = [];
   loadingComplete:any = 0;
+  status: string="";
 
   rootPage: any = PeoplePage;
   constructor(public platform: Platform, private menuCtrl: MenuController ,public navCtrl: NavController, private appService: AppService, public loadingCtrl:LoadingController) {
-    //let loader = loadingCtrl.create();
-    //loader.present();
+    this.status = "checking database...";
+    let loader = loadingCtrl.create({content: this.status});
+    loader.present();
     /*this.appService.getPeople().subscribe(
                        employee  => { this.employees=employee; loader.dismiss(); this.loadingComplete = 1;},
                        error =>  this.errorMessage = <any>error);*/
     platform.ready().then(() => {
       let db = new SQLite();
       db.openDatabase({name: "data.db", location: "default"}).then(() => { 
+        // create people table if not exists
+        this.status = "prepare people table...";
         db.executeSql(`CREATE TABLE IF NOT EXISTS people (
                 tkid TEXT PRIMARY KEY, 
                 department TEXT,
@@ -43,42 +47,54 @@ export class ContactsRoot {
                 departmentCode TEXT,
                 altPhone TEXT
             )`, {}).then((data) => {
-                console.log("People TABLE CREATED: ", data);
+                console.log("People table is ready: ", data);
             }, (error) => {
                 console.error("Unable to execute sql", error);
             });
-            db.executeSql(`CREATE TABLE IF NOT EXISTS favorites (
-                tkid TEXT PRIMARY KEY
-            )`, {}).then((data) => {
-                console.log("Fav TABLE CREATED: ", data);
-            }, (error) => {
-                console.error("Unable to execute sql", error);
-            })
+        this.status = "prepare favorites table...";
+        // create favorites table
+        db.executeSql(`CREATE TABLE IF NOT EXISTS favorites (
+            tkid TEXT PRIMARY KEY
+        )`, {}).then((data) => {
+            console.log("Favorites table is ready: ", data);
+        }, (error) => {
+            console.error("Unable to execute sql", error);
+        });
+
+        // test to see if there is data in the people table
         db.executeSql("SELECT tkid from people",[]).then((data) =>{
           console.log('init data',data);
           if(data.rows.length == 0)
-            {
-              //console.log("data from server");
-              this.refreshSqliteDb(db);
-            }
-          else{
+          {
+            //if no data, go on the internet and pull data from cloud server.
+            this.status = "fetching data from cloud...";
+            this.refreshSqliteDb(db);
+          }
+          else
+          {
+            // otherwise, pull data directly from database
+            this.status = "get data from table...";
             console.log("data from db");
             this.loadData(db);
           }
           },
             (error) =>{console.log("Error");});
         },
-            //open db error
-          (error) => {console.log(error)});
-    //loader.dismiss();
+        //open db error
+        (error) => {console.log(error)});
+
+
+      loader.dismiss();
+
       this.loadingComplete = 1;
     });
     
   }
+
   loadData(db){
     db.executeSql("SELECT * from people",[]).then((data) =>{
           this.employees = [];
-          console.log("data from db - loaddata ", data);
+          console.log("load data from db ", data);
             for(var i = 0; i < data.rows.length; i++) {
                 this.employees.push({
                   tkid: data.rows.item(i).tkid,
@@ -136,7 +152,7 @@ export class ContactsRoot {
       //let emps = this.appService.getFavorites();
 
       let db = new SQLite();
-       
+       // get my contacts
        db.openDatabase({name: "data.db", location: "default"}).then(() => {
           db.executeSql("SELECT people.tkid,people.fullName, people.extension, people.email,people.altPhone,people.jobTitle,people.department,people.departmentCode FROM favorites JOIN people ON favorites.tkid = people.tkid", []).then((data) => {
             console.log(data);
@@ -166,7 +182,7 @@ export class ContactsRoot {
       //this.nav.setRoot(PeoplePage,emps);
     }
     else{
-      
+      // get department contacts
       let db = new SQLite();
        
       db.openDatabase({name: "data.db", location: "default"}).then(() => {
@@ -205,7 +221,7 @@ export class ContactsRoot {
 
 
   ionViewDidLoad() {
-    console.log('Hello ContactsRoot Page');
+    console.log('Contact Root: Set home page.');
     this.platform.ready().then(() => {
       this.getDepartmentMembers('Fav');
     });

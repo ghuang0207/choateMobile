@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AppService } from '../../app/app.service';
-import {CallNumber} from 'ionic-native';
+import {CallNumber, SQLite} from 'ionic-native';
 import { NavController, NavParams, MenuController } from 'ionic-angular';
 
 @Component({
@@ -41,7 +41,34 @@ export class PeoplePage {
         
     }
     favorite(item){
+
         this.appService.addPersonToFavorit(item);
+        this.employees = [];
+        let db = new SQLite();
+       
+      db.openDatabase({name: "data.db", location: "default"}).then(() => {
+          db.executeSql("SELECT * FROM people WHERE tkid in (SELECT tkid from favorites)", []).then((data) => {
+            console.log("Refresh data", data);
+            if(data.rows.length > 0) {
+                for(var i = 0; i < data.rows.length; i++) {
+                    this.employees.push({
+                      tkid: data.rows.item(i).tkid,
+                      fullName: data.rows.item(i).fullName,
+                      department: data.rows.item(i).department,
+                      jobTitle: data.rows.item(i).jobTitle,
+                      departmentCode:data.rows.item(i).departmentCode,
+                      extension: data.rows.item(i).extension,
+                      altPhone: data.rows.item(i).altPhone,
+                      email: data.rows.item(i).email
+                    });
+                }
+            }
+        }, (error) => {
+            console.log("ERROR: " + JSON.stringify(error));
+        });
+         },
+       (error) => {console.log(error)});
+        //this.employees.splice(item,1);
     }
 
 

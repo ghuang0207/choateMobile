@@ -55,7 +55,7 @@ export class AppService {
                 db.executeSql("SELECT tkid FROM favorites WHERE tkid=(?)", [person.tkid]).then((data) => {
                     if(data.rows.length > 0) {
                         db.executeSql(`DELETE FROM 
-                                people WHERE tkid=(?)
+                                favorites WHERE tkid=(?)
                                 `, [person.tkid]).then((data) => {
                                     console.log("Deleted: " + JSON.stringify(data));
                                 }, (error) => {

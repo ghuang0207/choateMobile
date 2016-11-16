@@ -7,7 +7,15 @@
 
 <ion-content>
   <ion-list>
+    
     <button menuClose ion-item (click)="getDepartmentMembers('Fav')">My Contacts</button>
+    <ion-list-header>Logal Groups</ion-list-header>
+    <button menuClose ion-item (click)="getDepartmentMembers('BUS')">Business</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('LIT')">Litigation</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('PIP')">Intellectual Property</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('RE')">Real Estate</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('WM')">Wealth Management</button>
+    <ion-list-header>Administrative</ion-list-header>
     <button menuClose ion-item (click)="getDepartmentMembers('IT')">Information Technologies</button>
     <button menuClose ion-item (click)="getDepartmentMembers('HR')">Human Resources</button>
     <button menuClose ion-item (click)="getDepartmentMembers('FS')">Financial Services</button>

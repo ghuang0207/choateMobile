@@ -21,7 +21,7 @@
                 <ion-item-sliding #SlideItem>
                     <ion-item>
                         <ion-thumbnail item-left>
-                            <img src="https://azlabchoatestore.blob.core.windows.net/person-photo/noPhoto.jpg" onerror="this.src='https://azlabchoatestore.blob.core.windows.net/person-photo/noPhoto.jpg'"/> 
+                            <img src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{item.tkid}}.jpg" onerror="this.src='https://azlabchoatestore.blob.core.windows.net/person-photo/noPhoto.jpg'"/> 
                         </ion-thumbnail>
                         <strong>{{item.fullName}}</strong><br/>
                         <span style="font-size:0.8em;">
@@ -42,14 +42,14 @@
                         <ion-icon name="call" ></ion-icon>
                         Office
                         </button>
-                        <button ion-button color="danger" (click)="call(item.altPhone)">
+                        <button ion-button color="danger" (click)="call(item.altPhone)" *ngIf="item.altPhone != null">
                         <ion-icon name="phone-portrait"></ion-icon>
                         Mobile
-                        </button> <!--  -->
-                        <button ion-button color="green">
+                        </button>  
+                        <a href="mailTo:{{item.email}}" ion-button color="green">
                         <ion-icon name="mail"></ion-icon>
                         E-mail
-                        </button>
+                        </a>
                     </ion-item-options>
                 </ion-item-sliding>
             </ion-card-content>
