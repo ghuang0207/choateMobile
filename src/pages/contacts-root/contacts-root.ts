@@ -13,8 +13,8 @@ import {SQLite} from "ionic-native";
 */
 @Component({
   
-  templateUrl: 'contacts-root.html',
-  providers:[AppService]
+  templateUrl: 'contacts-root.html'//,
+  //providers:[AppService]
 })
 export class ContactsRoot {
   @ViewChild(Nav) nav: Nav;
@@ -33,61 +33,68 @@ export class ContactsRoot {
                        employee  => { this.employees=employee; loader.dismiss(); this.loadingComplete = 1;},
                        error =>  this.errorMessage = <any>error);*/
     platform.ready().then(() => {
-      let db = new SQLite();
-      db.openDatabase({name: "data.db", location: "default"}).then(() => { 
-        // create people table if not exists
-        this.status = "prepare people table...";
-        db.executeSql(`CREATE TABLE IF NOT EXISTS people (
-                tkid TEXT PRIMARY KEY, 
-                department TEXT,
-                fullName Text,
-                jobTitle TEXT,
-                extension TEXT,
-                email TEXT,
-                departmentCode TEXT,
-                altPhone TEXT
+          let db = new SQLite();
+          //let db = window.openDatabase("data.db", "1.0", "default database",2*1024*1024);
+          db.openDatabase({name: "data.db", location: "default"}).then(() => { 
+          //openDatabase("data.db", "1.0", "default database",2*1024*1024).then(() => {
+            // create people table if not exists
+            this.status = "prepare people table...";
+            db.executeSql(`CREATE TABLE IF NOT EXISTS people (
+                    tkid TEXT PRIMARY KEY, 
+                    department TEXT,
+                    fullName Text,
+                    jobTitle TEXT,
+                    extension TEXT,
+                    email TEXT,
+                    departmentCode TEXT,
+                    altPhone TEXT
+                )`, {}).then((data) => {
+                    console.log("People table is ready: ", data);
+                }, (error) => {
+                    console.error("Unable to execute sql", error);
+                });
+            this.status = "prepare favorites table...";
+            // create favorites table
+            db.executeSql(`CREATE TABLE IF NOT EXISTS favorites (
+                tkid TEXT PRIMARY KEY
             )`, {}).then((data) => {
-                console.log("People table is ready: ", data);
+                console.log("Favorites table is ready: ", data);
             }, (error) => {
                 console.error("Unable to execute sql", error);
             });
-        this.status = "prepare favorites table...";
-        // create favorites table
-        db.executeSql(`CREATE TABLE IF NOT EXISTS favorites (
-            tkid TEXT PRIMARY KEY
-        )`, {}).then((data) => {
-            console.log("Favorites table is ready: ", data);
-        }, (error) => {
-            console.error("Unable to execute sql", error);
-        });
 
-        // test to see if there is data in the people table
-        db.executeSql("SELECT tkid from people",[]).then((data) =>{
-          console.log('init data',data);
-          if(data.rows.length == 0)
-          {
-            //if no data, go on the internet and pull data from cloud server.
-            this.status = "fetching data from cloud...";
-            this.refreshSqliteDb(db);
-          }
-          else
-          {
-            // otherwise, pull data directly from database
-            this.status = "get data from table...";
-            console.log("data from db");
-            this.loadData(db);
-          }
-          },
-            (error) =>{console.log("Error");});
-        },
-        //open db error
-        (error) => {console.log(error)});
+            // test to see if there is data in the people table
+            db.executeSql("SELECT tkid from people",[]).then((data) =>{
+              console.log('init data',data);
+              if(data.rows.length == 0)
+              {
+                //if no data, go on the internet and pull data from cloud server.
+                this.status = "fetching data from cloud...";
+                this.refreshSqliteDb(db);
+              }
+              else
+              {
+                // otherwise, pull data directly from database
+                this.status = "get data from table...";
+                console.log("data from db");
+                this.loadData(db);
+              }
+              },
+                (error) =>{console.log("Error");});
+            },
+            //open db error
+            (error) => {
+              this.refreshSqliteDb(db);
+              console.log(this.employees);
+              console.log(error);
+            });
 
 
-      loader.dismiss();
+          loader.dismiss();
 
-      this.loadingComplete = 1;
+          this.loadingComplete = 1;
     });
+
     
   }
 
@@ -112,25 +119,21 @@ export class ContactsRoot {
   }
 
   refreshSqliteDb(db){
-      //let db = new SQLite();
-       
-       //db.openDatabase({name: "data.db", location: "default"}).then(() => {
-              this.appService.getPeople().subscribe(
-                employees  => {
-                  this.employees = employees;
-                  db.executeSql("DELETE FROM people", []).then((data) => {
-                      for(var i = 0; i < employees.length; i++) {
-                        this.loadDataIntoSqlite(employees[i],db);
-                      } 
-                  }, (error) => {
-                      //Delete error
-                      console.log("ERROR: " + JSON.stringify(error));
-                  });},
-                  //Service error
-                error =>  this.errorMessage = <any>error);
-      //    },
-          //open db error
-       // (error) => {console.log(error)});
+      this.appService.getPeople().subscribe(
+        employees  => {
+          this.employees = employees;
+          console.log(this.employees);
+          db.executeSql("DELETE FROM people", []).then((data) => {
+              for(var i = 0; i < employees.length; i++) {
+                this.loadDataIntoSqlite(employees[i],db);
+              } 
+          }, (error) => {
+              //Delete error 
+              this.getDepartmentMembers("Fav");
+              console.log("Called Fav ERROR: " + JSON.stringify(error));
+          });},
+          //Service error
+        error =>  {this.errorMessage = <any>error; console.log("Error Service");});
   }
 
 
@@ -155,7 +158,6 @@ export class ContactsRoot {
        // get my contacts
        db.openDatabase({name: "data.db", location: "default"}).then(() => {
           db.executeSql("SELECT people.tkid,people.fullName, people.extension, people.email,people.altPhone,people.jobTitle,people.department,people.departmentCode FROM favorites JOIN people ON favorites.tkid = people.tkid", []).then((data) => {
-            console.log(data);
             if(data.rows.length > 0) {
               let emps=[];
                 for(var i = 0; i < data.rows.length; i++) {
@@ -170,14 +172,17 @@ export class ContactsRoot {
                       email: data.rows.item(i).email
                     });
                 }
-                console.log(emps);
                 this.nav.setRoot(PeoplePage,emps);
             }
         }, (error) => {
+            this.nav.setRoot(PeoplePage,this.employees);
             console.log("ERROR: " + JSON.stringify(error));
         });
          },
-       (error) => {console.log(error)});
+       (error) => {
+         this.nav.setRoot(PeoplePage,this.employees);
+         console.log(error);
+        });
 
       //this.nav.setRoot(PeoplePage,emps);
     }
@@ -206,15 +211,11 @@ export class ContactsRoot {
                 this.nav.setRoot(PeoplePage,emps);
             }
         }, (error) => {
+            this.nav.setRoot(PeoplePage,this.employees);
             console.log("ERROR: " + JSON.stringify(error));
         });
          },
        (error) => {console.log(error)});
-      //let emps = this.appService.getDepartmentMembers(deptCode);
-
-
-      //this.navCtrl.push(PeoplePage,emps);
-      //this.nav.setRoot(PeoplePage,emps);
     }
 
   }

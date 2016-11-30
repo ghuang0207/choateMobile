@@ -27,7 +27,6 @@ export class AppService {
     public database: SQLite = null;
     public favoritPeople: any = [];
 
-
     public addPersonToFavorit(person){
       console.log(person);
        let db = new SQLite();

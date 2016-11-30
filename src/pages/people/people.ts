@@ -22,7 +22,7 @@ export class PeoplePage {
         }
         ];
         searchTerm: string = "";
-
+        allEmployees:any = [];
         employees: any = [];
         errorMessage: any;
         loadingComplete = 0;
@@ -32,6 +32,7 @@ export class PeoplePage {
       if (navParams.data.length){
         if(navParams.data.length > 0){
             this.employees = navParams.data;
+            this.allEmployees = navParams.data;
             this.hasFavorites = true;    
         }
             
@@ -46,6 +47,15 @@ export class PeoplePage {
       }
         
         
+    }
+    public search(val){
+        if(val.length > 0){
+            this.employees = this.allEmployees.filter(item => item.fullName.indexOf(val)>=0);
+            console.log(this.employees);
+        }
+        else {
+            this.employees = this.allEmployees;
+        }
     }
     favorite(item){
 
