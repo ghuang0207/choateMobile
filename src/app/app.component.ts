@@ -3,6 +3,7 @@ import { Platform } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 import { AppService } from '../app/app.service';
 import { TabsPage } from '../pages/tabs/tabs';
+import { Device } from 'ionic-native';
 
 
 @Component({
@@ -18,9 +19,15 @@ export class MyApp {
       StatusBar.styleDefault();
       Splashscreen.hide();
 
-      // init SQLite
+      // grab the device information - query db table to identify the login
       debugger;
+      console.log("UUID",Device.device.uuid);
+      console.log("Device",Device.device);
+      console.log("Model",Device.device.model);
+      console.log("Version",Device.device.version);
       
+
+      // init SQLite
       /*let db = new SQLite();
         db.openDatabase({
             name: "data.db",

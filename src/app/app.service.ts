@@ -23,11 +23,16 @@ export class AppService {
     private data: any;
     private observable: Observable<any>;
 
+    // logged-in person profile
+    private profileUrl = '';
+    private profile: any;
+    // todo: an api to receive device object and return user profile
+
     // SQLite section for favorit contacts
     public database: SQLite = null;
     public favoritPeople: any = [];
 
-    public addPersonToFavorit(person){
+    public toggleFavorite(person){
       console.log(person);
        let db = new SQLite();
        db.openDatabase({name: "data.db", location: "default"}).then(() => {

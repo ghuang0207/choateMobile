@@ -24,6 +24,7 @@ export class DailyRoot {
   }
 
   ionViewDidEnter(){
+    this.menuCtrl.swipeEnable(false,"dailyMenu");
     this.menuCtrl.enable(true, "dailyMenu");
     this.menuCtrl.enable(false, "contactsMenu");
   }

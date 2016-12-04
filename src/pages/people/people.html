@@ -8,12 +8,15 @@
 </ion-header>
 
 <ion-content>
+    <ion-refresher (ionRefresh)="doRefresh($event)" >
+        <ion-refresher-content pullingText="Pull to refresh." refreshingText="Redirecting to all employees"></ion-refresher-content>
+    </ion-refresher>
     <ion-searchbar placeholder="Search Contacts" [(ngModel)]="searchTerm" (ngModelChange)="search($event)">
     </ion-searchbar>
     <ion-list>
         <ion-card *ngIf="employees.length == 0 && !hasFavorites">
             <ion-card-content>
-                You have not added any favorites yet.
+                You have not added any favorites yet. Please find the person and swipe left to add favorite.
             </ion-card-content>
         </ion-card>
         <ion-card *ngFor="let item of employees" (click)="itemSelected(item)">
@@ -21,7 +24,8 @@
                 <ion-item-sliding #SlideItem>
                     <ion-item>
                         <ion-thumbnail item-left>
-                            <img src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{item.tkid}}.jpg" onerror="this.src='https://azlabchoatestore.blob.core.windows.net/person-photo/noPhoto.jpg'"/> 
+                            <img *ngIf="item.hasPhoto == 1" src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{item.tkid}}.jpg" onerror="this.src='assets/images/noPhoto.jpg''"/> 
+                            <img *ngIf="item.hasPhoto == 0" src="assets/images/noPhoto.jpg"/> 
                         </ion-thumbnail>
                         <strong>{{item.fullName}}</strong><br/>
                         <span style="font-size:0.8em;">
@@ -31,7 +35,7 @@
                         </span>
                     </ion-item>
                     <ion-item-options side="left">
-                        <button ion-button (click)="favorite(item)">
+                        <button [attr.newColor]="item.isFavorite == 1?danger:null" ion-button (click)="favorite(item)">
                         <ion-icon name="heart" *ngIf="item.isFavorite == 1"></ion-icon>
                         <ion-icon name="heart-outline" *ngIf="item.isFavorite != 1"></ion-icon>
                         Favorite

@@ -23,22 +23,24 @@ export class ContactsRoot {
   favTKIDs:any = [];
   loadingComplete:any = 0;
   status: string="";
+  loader: any;
 
   rootPage: any = PeoplePage;
   constructor(public platform: Platform, private menuCtrl: MenuController ,public navCtrl: NavController, private appService: AppService, public loadingCtrl:LoadingController) {
     this.status = "checking database...";
-    let loader = loadingCtrl.create({content: this.status});
-    loader.present();
+    this.loader = loadingCtrl.create({content: this.status});
+    this.loader.present();
     /*this.appService.getPeople().subscribe(
                        employee  => { this.employees=employee; loader.dismiss(); this.loadingComplete = 1;},
                        error =>  this.errorMessage = <any>error);*/
     platform.ready().then(() => {
+      
           let db = new SQLite();
           //let db = window.openDatabase("data.db", "1.0", "default database",2*1024*1024);
           db.openDatabase({name: "data.db", location: "default"}).then(() => { 
           //openDatabase("data.db", "1.0", "default database",2*1024*1024).then(() => {
             // create people table if not exists
-            this.status = "prepare people table...";
+            this.status = "prepare people table...";            
             db.executeSql(`CREATE TABLE IF NOT EXISTS people (
                     tkid TEXT PRIMARY KEY, 
                     department TEXT,
@@ -47,7 +49,8 @@ export class ContactsRoot {
                     extension TEXT,
                     email TEXT,
                     departmentCode TEXT,
-                    altPhone TEXT
+                    altPhone TEXT,
+                    hasPhoto INTEGER
                 )`, {}).then((data) => {
                     console.log("People table is ready: ", data);
                 }, (error) => {
@@ -90,7 +93,7 @@ export class ContactsRoot {
             });
 
 
-          loader.dismiss();
+          this.loader.dismiss();
 
           this.loadingComplete = 1;
     });
@@ -111,7 +114,8 @@ export class ContactsRoot {
                   departmentCode: data.rows.item(i).departmentCode,
                   extension: data.rows.item(i).extension,
                   altPhone: data.rows.item(i).altPhone,
-                  email: data.rows.item(i).email
+                  email: data.rows.item(i).email,
+                  hasPhoto: data.rows.item(i).hasPhoto
                 });
             }
         },
@@ -124,9 +128,17 @@ export class ContactsRoot {
           this.employees = employees;
           console.log(this.employees);
           db.executeSql("DELETE FROM people", []).then((data) => {
+            this.loader = this.loadingCtrl.create({content:"Syncing Database please wait..."});
+            this.loader.present();
+            
               for(var i = 0; i < employees.length; i++) {
                 this.loadDataIntoSqlite(employees[i],db);
               } 
+              setTimeout(()=>{
+                  this.loader.dismiss();
+              },5000);
+            
+             
           }, (error) => {
               //Delete error 
               this.getDepartmentMembers("Fav");
@@ -139,9 +151,9 @@ export class ContactsRoot {
 
   loadDataIntoSqlite(person, db){
       db.executeSql(`INSERT INTO 
-                    people (tkid,fullName,email,department,jobTitle,extension,altPhone,departmentCode) 
-                        VALUES (?,?,?,?,?,?,?,?)
-                    `, [person.tkid,person.fullName,person.email,person.department,person.jobTitle,person.extension,person.altPhone,person.departmentCode]).then((data) => {
+                    people (tkid,fullName,email,department,jobTitle,extension,altPhone,departmentCode,hasPhoto) 
+                        VALUES (?,?,?,?,?,?,?,?,?)
+                    `, [person.tkid,person.fullName,person.email,person.department,person.jobTitle,person.extension,person.altPhone,person.departmentCode,person.hasPhoto.toString()]).then((data) => {
                         console.log("INSERTED: " + JSON.stringify(data));
                     }, (error) => {
                         console.log("ERROR: " + JSON.stringify(error));
@@ -150,6 +162,8 @@ export class ContactsRoot {
   }
 
   getDepartmentMembers(deptCode : string){
+    this.loader = this.loadingCtrl.create({content:"Loading"});
+    this.loader.present();
     if(deptCode=="Fav"){
 
       //let emps = this.appService.getFavorites();
@@ -157,7 +171,7 @@ export class ContactsRoot {
       let db = new SQLite();
        // get my contacts
        db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT people.tkid,people.fullName, people.extension, people.email,people.altPhone,people.jobTitle,people.department,people.departmentCode FROM favorites JOIN people ON favorites.tkid = people.tkid", []).then((data) => {
+          db.executeSql("SELECT people.tkid,people.fullName, people.extension, people.email,people.altPhone,people.jobTitle,people.department,people.departmentCode,people.hasPhoto FROM favorites JOIN people ON favorites.tkid = people.tkid", []).then((data) => {
             if(data.rows.length > 0) {
               let emps=[];
                 for(var i = 0; i < data.rows.length; i++) {
@@ -169,12 +183,19 @@ export class ContactsRoot {
                       departmentCode:data.rows.item(i).departmentCode,
                       extension: data.rows.item(i).extension,
                       altPhone: data.rows.item(i).altPhone,
-                      email: data.rows.item(i).email
+                      email: data.rows.item(i).email,
+                      hasPhoto: data.rows.item(i).hasPhoto,
+                      isFavorite:1
                     });
                 }
+                this.loader.dismiss();
                 this.nav.setRoot(PeoplePage,emps);
             }
+            else{
+              this.loader.dismiss();
+            }
         }, (error) => {
+          this.loader.dismiss();
             this.nav.setRoot(PeoplePage,this.employees);
             console.log("ERROR: " + JSON.stringify(error));
         });
@@ -186,7 +207,47 @@ export class ContactsRoot {
 
       //this.nav.setRoot(PeoplePage,emps);
     }
-    else{
+    else if (deptCode == 'All'){
+      // get department contacts
+      let db = new SQLite();
+      
+       
+      db.openDatabase({name: "data.db", location: "default"}).then(() => {
+          db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid", []).then((data) => {
+            console.log(data);
+            if(data.rows.length > 0) {
+              let emps=[];
+                for(var i = 0; i < data.rows.length; i++) {
+                    emps.push({
+                      tkid: data.rows.item(i).tkid,
+                      fullName: data.rows.item(i).fullName,
+                      department: data.rows.item(i).department,
+                      jobTitle: data.rows.item(i).jobTitle,
+                      departmentCode:data.rows.item(i).departmentCode,
+                      extension: data.rows.item(i).extension,
+                      altPhone: data.rows.item(i).altPhone,
+                      email: data.rows.item(i).email,
+                      hasPhoto: data.rows.item(i).hasPhoto,
+                      isFavorite: (data.rows.item(i).fav == null)?0:1
+                    });
+                }
+                console.log(emps);
+                this.loader.dismiss();
+                this.nav.setRoot(PeoplePage,emps);
+                
+            }
+            else{
+              this.loader.dismiss();
+            }
+        }, (error) => {
+          this.loader.dismiss();
+            this.nav.setRoot(PeoplePage,this.employees);
+            console.log("ERROR: " + JSON.stringify(error));
+        });
+         },
+       (error) => {console.log(error)});
+    }
+    else {
       // get department contacts
       let db = new SQLite();
        
@@ -204,20 +265,26 @@ export class ContactsRoot {
                       departmentCode:data.rows.item(i).departmentCode,
                       extension: data.rows.item(i).extension,
                       altPhone: data.rows.item(i).altPhone,
-                      email: data.rows.item(i).email
+                      email: data.rows.item(i).email,
+                      hasPhoto: data.rows.item(i).hasPhoto
                     });
                 }
                 console.log(emps);
+                this.loader.dismiss();
                 this.nav.setRoot(PeoplePage,emps);
             }
+            else{
+              this.loader.dismiss();
+            }
         }, (error) => {
+          this.loader.dismiss();
             this.nav.setRoot(PeoplePage,this.employees);
             console.log("ERROR: " + JSON.stringify(error));
         });
          },
        (error) => {console.log(error)});
     }
-
+    
   }
 
 
@@ -229,6 +296,7 @@ export class ContactsRoot {
   }
 
   ionViewDidEnter(){
+    this.menuCtrl.swipeEnable(false,"contactsMenu");
     this.menuCtrl.enable(true, "contactsMenu");
     this.menuCtrl.enable(false, "dailyMenu");
     console.log(this.rootPage.employees);

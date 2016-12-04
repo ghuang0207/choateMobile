@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { AppService } from '../../app/app.service';
 import {CallNumber, SQLite} from 'ionic-native';
-import { NavController, NavParams, MenuController } from 'ionic-angular';
+import { NavController, NavParams, MenuController,LoadingController } from 'ionic-angular';
 
 @Component({
   selector: 'page-people',
@@ -26,9 +26,10 @@ export class PeoplePage {
         employees: any = [];
         errorMessage: any;
         loadingComplete = 0;
+        loader:any;
         hasFavorites: boolean = true;
 
-  constructor(private menuCtrl: MenuController  ,public navCtrl: NavController, public appService: AppService, private navParams: NavParams ) {
+  constructor(private menuCtrl: MenuController  ,public navCtrl: NavController, public appService: AppService, private navParams: NavParams, public loadingCtrl:LoadingController ) {
       if (navParams.data.length){
         if(navParams.data.length > 0){
             this.employees = navParams.data;
@@ -48,6 +49,57 @@ export class PeoplePage {
         
         
     }
+
+     public doRefresh(refresher) {
+            console.log('Begin async operation', refresher);
+            let db = new SQLite();            
+             db.openDatabase({name: "data.db", location: "default"}).then(() => {
+                this.refreshSqliteDb(db);
+             }, (error) => {
+                 console.log(error);
+             }); 
+            setTimeout(() => {
+            console.log('Async operation has ended');
+            refresher.complete();
+            }, 2000);
+    }
+
+  refreshSqliteDb(db){
+      this.appService.getPeople().subscribe(
+        employees  => {
+          this.employees = employees;
+          //console.log(this.employees);
+          db.executeSql("DELETE FROM people", []).then((data) => {
+            this.loader = this.loadingCtrl.create({content:"Syncing Database please wait..."});
+            this.loader.present();
+            
+            for(var i = 0; i < employees.length; i++) {
+                this.loadDataIntoSqlite(employees[i],db);
+            } 
+            setTimeout(()=> {this.loader.dismiss()},5000);
+            
+             // this.loader.dismiss();
+          }, (error) => {
+              //Delete error 
+              //this.getDepartmentMembers("Fav");
+              console.log("Called Fav ERROR: " + JSON.stringify(error));
+          });},
+          //Service error
+        error =>  {this.errorMessage = <any>error; console.log("Error Service");});
+  }
+  loadDataIntoSqlite(person, db){
+      db.executeSql(`INSERT INTO 
+                    people (tkid,fullName,email,department,jobTitle,extension,altPhone,departmentCode,hasPhoto) 
+                        VALUES (?,?,?,?,?,?,?,?,?)
+                    `, [person.tkid,person.fullName,person.email,person.department,person.jobTitle,person.extension,person.altPhone,person.departmentCode,person.hasPhoto]).then((data) => {
+                        console.log("INSERTED: " + JSON.stringify(data));
+                    }, (error) => {
+                        console.log("ERROR: " + JSON.stringify(error));
+                });
+
+  }
+
+
     public search(val){
         if(val.length > 0){
             this.employees = this.allEmployees.filter(item => item.fullName.indexOf(val)>=0);
@@ -58,10 +110,16 @@ export class PeoplePage {
         }
     }
     favorite(item){
+        
+        this.appService.toggleFavorite(item);
+        
+        item.isFavorite = !item.isFavorite;
+        
+        
+        
 
-        this.appService.addPersonToFavorit(item);
-        this.employees = [];
-        let db = new SQLite();
+        //this.employees = [];
+        /*let db = new SQLite();
        
       db.openDatabase({name: "data.db", location: "default"}).then(() => {
           db.executeSql("SELECT * FROM people WHERE tkid in (SELECT tkid from favorites)", []).then((data) => {
@@ -76,7 +134,8 @@ export class PeoplePage {
                       departmentCode:data.rows.item(i).departmentCode,
                       extension: data.rows.item(i).extension,
                       altPhone: data.rows.item(i).altPhone,
-                      email: data.rows.item(i).email
+                      email: data.rows.item(i).email,
+                      hasPhoto: data.rows.item(i).hasPhoto
                     });
                 }
             }
@@ -84,7 +143,7 @@ export class PeoplePage {
             console.log("ERROR: " + JSON.stringify(error));
         });
          },
-       (error) => {console.log(error)});
+       (error) => {console.log(error)});*/
         //this.employees.splice(item,1);
     }
 
