@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { AppService } from '../../app/app.service';
 import {CallNumber, SQLite} from 'ionic-native';
+import {Observable} from 'rxjs/Rx';
 import { NavController, NavParams, MenuController,LoadingController } from 'ionic-angular';
 
 @Component({
   selector: 'page-people',
-  templateUrl: 'people.html',
-  providers:[AppService]
+  templateUrl: 'people.html'//,
+  //providers:[AppService]
 })
 export class PeoplePage {
     items = [
@@ -28,6 +29,9 @@ export class PeoplePage {
         loadingComplete = 0;
         loader:any;
         hasFavorites: boolean = true;
+        allEmployeeLength:number = 0;
+        person: any;
+        timer : any;
 
   constructor(private menuCtrl: MenuController  ,public navCtrl: NavController, public appService: AppService, private navParams: NavParams, public loadingCtrl:LoadingController ) {
       if (navParams.data.length){
@@ -35,6 +39,7 @@ export class PeoplePage {
             this.employees = navParams.data;
             this.allEmployees = navParams.data;
             this.hasFavorites = true;    
+            this.allEmployeeLength = appService.allEmployees.length;
         }
             
         else{
@@ -46,8 +51,24 @@ export class PeoplePage {
           this.employees= [];
           this.hasFavorites = false;
       }
+        this.timer = setInterval(()=> this.assignPerson(),2000);
+        //appService.getPeopleLogin().subscribe(res=>{console.log(res);this.person=res;})
         
+    }
+    
+    public assignPerson(){
         
+        this.person = this.appService.profile;
+        console.log(this.person);
+        if(this.appService.profileLoaded == true){
+            console.log("Profile");
+            console.log(this.appService.profile);
+            this.stopInterval();
+        }
+
+    }
+    public stopInterval(){
+        clearInterval(this.timer);
     }
 
      public doRefresh(refresher) {
@@ -163,6 +184,31 @@ export class PeoplePage {
     }
     
   ionViewDidLoad() {
+      console.log("subscribe");
+       /*this.appService.profileObservable.subscribe(result=>{
+           this.person=result;
+           console.log(result);
+        });*/
+        //this.obs = this.appService.getProfile(); 
+        console.log("Init for people");
+        
+        //setTimeout(()=>{this.obs.subscribe(res=>{console.log(res);})},10000);
+        /*this.appService.getProfile().subscribe(
+            res => {
+                console.log("mess");
+                console.log(res);
+                //console.log(res);
+            }
+        );*/
+        /*.subscribe(response => {
+            this.person=response;
+            console.log("load bview");
+            console.log(response);
+        });        
+        //console.log(this.person);
+        console.log("from service");
+
+        //console.log(this.appService.profile);
       /*if (!this.navParams.data.length)
         this.appService.getPeople().subscribe(
                        employee  => { this.employees=employee;},

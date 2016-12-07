@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 //import { RequestOptions, Request, Response, RequestMethod, Headers, Http, URLSearchParams } from '@angular/http';
 import { Http } from '@angular/http';
-import { Observable } from 'rxjs/Rx';
+import { Observable, BehaviorSubject } from 'rxjs/Rx';
 import {SQLite} from "ionic-native"; // for SQLite
 
 
@@ -12,11 +12,11 @@ import {SQLite} from "ionic-native"; // for SQLite
 @Injectable()
 export class AppService {
     employees : any = [];
+    public allEmployees : any = [];
+    public device: any;
     //Initialize the logged in user
     constructor(private http: Http) {
     }
-
-    
     
     // by george - for reference
     private url:string = 'http://azlabchoate20160421.azurewebsites.net/api/person';
@@ -24,13 +24,116 @@ export class AppService {
     private observable: Observable<any>;
 
     // logged-in person profile
-    private profileUrl = '';
-    private profile: any;
+    private profileUrl = 'http://azlabchoate20160421.azurewebsites.net/api/profile/';
+    //private profileObservable: BehaviorSubject<any> = new BehaviorSubject({});
+    //public profile: Observable<any> = this.profileObservable.asObservable();
+    public profile: any;
+    public profileLoaded: boolean = false;
     // todo: an api to receive device object and return user profile
 
     // SQLite section for favorit contacts
     public database: SQLite = null;
     public favoritPeople: any = [];
+
+    /*public getPeopleLogin() {
+      if(this.profile) {
+        // if `data` is available just return it as `Observable`
+        console.log("data from cached data");
+        return Observable.of(this.profile); 
+      } else if(this.profileObs) {
+        // if `this.observable` is set then the request is in progress
+        // return the `Observable` for the ongoing request
+        console.log("from observable");
+        return this.profileObs;
+      } else {
+        
+        // create the request, store the `Observable` for subsequent subscribers
+        this.profileObs = this.http.get(this.profileUrl+this.device["uuid"])
+        .map(response =>  {
+          // when the cached data is available we don't need the `Observable` reference anymore
+          this.profileObs = null;
+
+          if(response.status == 400) {
+            return "FAILURE";
+          } else if(response.status == 200) {
+              console.log(response);
+            this.profile = response.json();
+            
+            return this.profile;
+          }
+          // make it shared so more than one subscriber can get the result
+        })
+        .share();
+        console.log("data from server");
+        return this.profileObs;
+      }
+    }*/
+
+    public getLoginProfile(uuid){
+        console.log("geting profile");
+        //this.profileObservable = 
+        this.profile = this.http.get(this.profileUrl+uuid).subscribe(response =>  {
+            console.log("profile");
+            this.profile = response.json();
+            console.log(response.json());
+            this.profileLoaded = true;
+            //this.profile = response.json();
+          },
+          (err)=>{console.log("error thrown");this.profile=null;this.profileLoaded = true;console.log(err);});
+
+          //return this.profile;
+          //console.log(prof)
+    }
+
+    /*public getProfile(){
+        return this.profileObservable.asObservable();
+        //return this.profile;
+    }*/
+
+    public setAllEmployees(){
+    let db = new SQLite();
+          //let db = window.openDatabase("data.db", "1.0", "default database",2*1024*1024);
+    db.openDatabase({name: "data.db", location: "default"}).then(() => {
+          db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid", []).then((data) => {
+            console.log(data);
+            if(data.rows.length > 0) {
+              let emps=[];
+                for(var i = 0; i < data.rows.length; i++) {
+                    emps.push({
+                      tkid: data.rows.item(i).tkid,
+                      fullName: data.rows.item(i).fullName,
+                      department: data.rows.item(i).department,
+                      jobTitle: data.rows.item(i).jobTitle,
+                      departmentCode:data.rows.item(i).departmentCode,
+                      extension: data.rows.item(i).extension,
+                      altPhone: data.rows.item(i).altPhone,
+                      email: data.rows.item(i).email,
+                      hasPhoto: data.rows.item(i).hasPhoto,
+                      isFavorite: (data.rows.item(i).fav == null)?0:1
+                    });
+                }
+                this.allEmployees = emps;
+            }
+           
+        }, (error) => {
+            console.log("ERROR: " + JSON.stringify(error));
+        });
+         },
+       (error) => {console.log(error)});
+
+    }
+
+    public getAllEmployees(){
+        return this.allEmployees;
+    }
+
+    public getDeviceInfo(){
+        return this.device;
+    }
+    public setDeviceInfo(d){
+        this.device = d;
+    }
+    
 
     public toggleFavorite(person){
       console.log(person);

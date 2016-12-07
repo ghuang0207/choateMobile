@@ -1,7 +1,12 @@
 <ion-menu [content]="content" id="contactsMenu" persistent="true">
 <ion-header>
   <ion-toolbar>
-    <ion-title>Departments</ion-title>
+    <ion-buttons start>
+    <button menuClose (click)="doRefresh()" color="primary" ion-button solid style="width:40px;height:30px;font-size: 1.5em;">
+      <ion-icon name="refresh" class="refreshIcon"></ion-icon>
+    </button>
+    </ion-buttons>
+    <ion-title>View</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -12,15 +17,21 @@
     <button menuClose ion-item (click)="getDepartmentMembers('All')">All Contacts</button>
     <ion-list-header>Legal Groups</ion-list-header>
     <button menuClose ion-item (click)="getDepartmentMembers('BUS')">Business</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('CIA')">CIA</button>
     <button menuClose ion-item (click)="getDepartmentMembers('LIT')">Litigation</button>
     <button menuClose ion-item (click)="getDepartmentMembers('PIP')">Intellectual Property</button>
     <button menuClose ion-item (click)="getDepartmentMembers('RE')">Real Estate</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('SEC')">Assistants</button>
     <button menuClose ion-item (click)="getDepartmentMembers('WM')">Wealth Management</button>
     <ion-list-header>Administrative</ion-list-header>
     <button menuClose ion-item (click)="getDepartmentMembers('IT')">Information Technologies</button>
     <button menuClose ion-item (click)="getDepartmentMembers('HR')">Human Resources</button>
     <button menuClose ion-item (click)="getDepartmentMembers('FS')">Financial Services</button>
-    <button menuClose ion-item (click)="getDepartmentMembers('LIT')">Litigation</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('LIB')">Library</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('PD')">Professional Development</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('RC')">Records</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('TAX')">Tax</button>
+    <button menuClose ion-item (click)="getDepartmentMembers('TR')">Trust Operations</button>
   </ion-list>
 </ion-content>
 

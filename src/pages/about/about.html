@@ -6,10 +6,49 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
+
   <ion-card>
     <ion-card-content>
-      This Appplication has been made with <ion-icon name="heart"></ion-icon> by the Solution Development Team.
+      This Appplication has been made with <ion-icon name="heart"></ion-icon> by the Solutions Development Team.     
     </ion-card-content>
   </ion-card>
+
+    <ion-card *ngIf="profile">
+    <ion-card-header style="background-color:palegreen;">Profile</ion-card-header>
+    <ion-card-content style="margin:2px;padding:2px;">
+      <ion-list>
+            <ion-item style="margin:0px;padding:0px;">
+              <ion-thumbnail item-left>
+                  <img *ngIf="profile.hasPhoto == 1" src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{profile.tkid}}.jpg" onerror="this.src='assets/images/noPhoto.jpg''"/> 
+                  <img *ngIf="profile.hasPhoto == 0" src="assets/images/noPhoto.jpg"/> 
+              </ion-thumbnail>
+              <strong>{{profile.fullName}}</strong><br/>
+              <span style="font-size:0.8em;">
+              {{profile.department}}<br/>
+              {{profile.jobTitle}}<br/>
+              617-248-{{profile.extension}}
+              </span>
+          </ion-item>
+      </ion-list>             
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header style="background-color:lightgreen;"> Device Information</ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item text-wrap style="margin:5px;padding:5px;">UUID : {{device.uuid}}</ion-item>
+        <ion-item style="margin:5px;padding:5px;">Model : {{device.model}}</ion-item>
+        <ion-item style="margin:5px;padding:5px;">Platform : {{device.platform}}    </ion-item>
+        <ion-item style="margin:5px;padding:5px;">S/No. : {{device.serial}} </ion-item>
+        <ion-item style="margin:5px;padding:5px;">OS Version : {{device.version}}</ion-item>
+        <ion-item style="margin:5px;padding:5px;">App Version : {{device.appversion}}</ion-item>
+      </ion-list>             
+    </ion-card-content>
+  </ion-card>
+
+  
+      
 </ion-content>
+

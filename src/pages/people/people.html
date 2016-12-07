@@ -3,17 +3,17 @@
       <button ion-button menuToggle>
           <ion-icon name="menu"></ion-icon>
       </button>
-    <ion-title>People @ Choate</ion-title>
+    <ion-title>People @ Choate {{employees.length}}/{{allEmployeeLength}}</ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
-    <ion-refresher (ionRefresh)="doRefresh($event)" >
+    <!--<ion-refresher (ionRefresh)="doRefresh($event)" >
         <ion-refresher-content pullingText="Pull to refresh." refreshingText="Redirecting to all employees"></ion-refresher-content>
-    </ion-refresher>
-    <ion-searchbar placeholder="Search Contacts" [(ngModel)]="searchTerm" (ngModelChange)="search($event)">
+    </ion-refresher>-->
+    <ion-searchbar placeholder="Type to search name in this list" [(ngModel)]="searchTerm" (ngModelChange)="search($event)">
     </ion-searchbar>
-    <ion-list>
+    <ion-list *ngIf="person">
         <ion-card *ngIf="employees.length == 0 && !hasFavorites">
             <ion-card-content>
                 You have not added any favorites yet. Please find the person and swipe left to add favorite.

@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { Platform } from 'ionic-angular';
-import { StatusBar, Splashscreen } from 'ionic-native';
 import { AppService } from '../app/app.service';
 import { TabsPage } from '../pages/tabs/tabs';
-import { Device } from 'ionic-native';
+import { StatusBar, Splashscreen , Device, AppVersion } from 'ionic-native';
 
 
 @Component({
@@ -25,7 +24,18 @@ export class MyApp {
       console.log("Device",Device.device);
       console.log("Model",Device.device.model);
       console.log("Version",Device.device.version);
+      let d = Device.device;
       
+      AppVersion.getVersionNumber().then((appversion) => {
+        d["appversion"] = appversion;
+        appService.setDeviceInfo(d)
+      }, (err) => {console.log(err)}
+       );
+      
+      appService.setAllEmployees();
+
+      appService.getLoginProfile(d["uuid"]);
+      //appService.getPeopleLogin().subscribe(res=>{console.log("First Profile");console.log(res);});
 
       // init SQLite
       /*let db = new SQLite();

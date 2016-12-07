@@ -101,6 +101,17 @@ export class ContactsRoot {
     
   }
 
+    public doRefresh() {          
+            let db = new SQLite();            
+             db.openDatabase({name: "data.db", location: "default"}).then(() => {
+                this.refreshSqliteDb(db);                
+                this.getDepartmentMembers("All");
+             }, (error) => {
+                 console.log(error);
+             }); 
+    }
+
+
   loadData(db){
     db.executeSql("SELECT * from people",[]).then((data) =>{
           this.employees = [];
@@ -126,7 +137,7 @@ export class ContactsRoot {
       this.appService.getPeople().subscribe(
         employees  => {
           this.employees = employees;
-          console.log(this.employees);
+          //console.log(this.employees);
           db.executeSql("DELETE FROM people", []).then((data) => {
             this.loader = this.loadingCtrl.create({content:"Syncing Database please wait..."});
             this.loader.present();
@@ -136,7 +147,7 @@ export class ContactsRoot {
               } 
               setTimeout(()=>{
                   this.loader.dismiss();
-              },5000);
+              },10000);
             
              
           }, (error) => {
@@ -193,6 +204,8 @@ export class ContactsRoot {
             }
             else{
               this.loader.dismiss();
+              let emps = [];
+              this.nav.setRoot(PeoplePage,emps);              
             }
         }, (error) => {
           this.loader.dismiss();
@@ -247,12 +260,13 @@ export class ContactsRoot {
          },
        (error) => {console.log(error)});
     }
-    else {
+    else if (deptCode == 'SEC'){
       // get department contacts
       let db = new SQLite();
+      
        
       db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT * FROM people WHERE departmentCode = (?)", [deptCode]).then((data) => {
+          db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid WHERE people.departmentCode like (?)", ["SEC%"]).then((data) => {
             console.log(data);
             if(data.rows.length > 0) {
               let emps=[];
@@ -266,7 +280,47 @@ export class ContactsRoot {
                       extension: data.rows.item(i).extension,
                       altPhone: data.rows.item(i).altPhone,
                       email: data.rows.item(i).email,
-                      hasPhoto: data.rows.item(i).hasPhoto
+                      hasPhoto: data.rows.item(i).hasPhoto,
+                      isFavorite: (data.rows.item(i).fav == null)?0:1
+                    });
+                }
+                console.log(emps);
+                this.loader.dismiss();
+                this.nav.setRoot(PeoplePage,emps);
+                
+            }
+            else{
+              this.loader.dismiss();
+            }
+        }, (error) => {
+          this.loader.dismiss();
+            this.nav.setRoot(PeoplePage,this.employees);
+            console.log("ERROR: " + JSON.stringify(error));
+        });
+         },
+       (error) => {console.log(error)});
+    }
+    else {
+      // get department contacts
+      let db = new SQLite();
+       
+      db.openDatabase({name: "data.db", location: "default"}).then(() => {
+          db.executeSql("SELECT people.* FROM people LEFT JOIN favorites on people.tkid=favorites.tkid WHERE people.departmentCode = (?)", [deptCode]).then((data) => {
+            console.log(data);
+            if(data.rows.length > 0) {
+              let emps=[];
+                for(var i = 0; i < data.rows.length; i++) {
+                    emps.push({
+                      tkid: data.rows.item(i).tkid,
+                      fullName: data.rows.item(i).fullName,
+                      department: data.rows.item(i).department,
+                      jobTitle: data.rows.item(i).jobTitle,
+                      departmentCode:data.rows.item(i).departmentCode,
+                      extension: data.rows.item(i).extension,
+                      altPhone: data.rows.item(i).altPhone,
+                      email: data.rows.item(i).email,
+                      hasPhoto: data.rows.item(i).hasPhoto,
+                      isFavorite: (data.rows.item(i).fav == null)?0:1
                     });
                 }
                 console.log(emps);
