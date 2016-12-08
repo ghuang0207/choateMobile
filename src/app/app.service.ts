@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 import {SQLite} from "ionic-native"; // for SQLite
-import { Storage } from "@ionic/storage";
+import { Storage } from '@ionic/storage';
 
 
 //import 'rxjs/add/operator/map';
@@ -30,6 +30,7 @@ export class AppService {
     public profileLoaded: boolean = false;
     public peopleLoaded: boolean = false;
     // todo: an api to receive device object and return user profile
+    
 
     // SQLite section for favorit contacts
     public database: SQLite = null;
@@ -43,16 +44,16 @@ export class AppService {
             this.profile = response.json();
             console.log(response.json());
             this.profileLoaded = true;
-            this.storage.set('fullName',this.profile.fullName);
+            /*this.storage.set('fullName',this.profile.fullName);
             this.storage.set('department',this.profile.department);
             this.storage.set('JobTitle',this.profile.JobTitle);
             this.storage.set('extension',this.profile.extension);
             this.storage.set('tkid',this.profile.tkid);
             this.storage.set('hasPhoto',this.profile.hasPhoto);
             console.log("From Storage");
-            storage.get('fullName').then((val) => {
+            this.storage.get('fullName').then((val) => {
                     console.log('Your name is', val);
-                });
+                });*/
             //this.profile = response.json();
           },
           (err)=>{console.log("error thrown");this.profile=null;this.profileLoaded = true;console.log(err);});
@@ -101,6 +102,22 @@ export class AppService {
     }
     public setDeviceInfo(d){
         this.device = d;
+        if (!this.device.serial){
+            this.device.serial = "N/A";
+        }
+        console.log("device info set");
+        console.log(this.device);
+        let auditInfo = {};
+        auditInfo["UUID"] = this.device.uuid;
+        auditInfo["Platform"] = this.device.platform;
+        auditInfo["Model"] = this.device.model;
+        auditInfo["Serial"] = this.device.serial;
+        auditInfo["OSVersion"] = this.device.version;
+        auditInfo["AppVersion"] = this.device.appversion;
+        //Call the post
+        this.http.post(this.profileUrl,auditInfo).subscribe((res) =>{
+                console.log("Audit Success");
+        },(err)=>{console.log("Audit Error");console.log(err)});
     }
     
 

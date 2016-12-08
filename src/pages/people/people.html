@@ -3,7 +3,7 @@
       <button ion-button menuToggle>
           <ion-icon name="menu"></ion-icon>
       </button>
-    <ion-title>People {{employees.length}}/{{allEmployeeLength}}</ion-title>
+    <ion-title>People</ion-title><!--{{employees.length}}/{{allEmployeeLength}}-->
   </ion-navbar>
 </ion-header>
 
@@ -30,7 +30,7 @@
                 <ion-item-sliding #SlideItem>
                     <ion-item>
                         <ion-thumbnail item-left>
-                            <img *ngIf="item.hasPhoto == 1" src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{item.tkid}}.jpg" onerror="this.src='assets/images/noPhoto.jpg''"/> 
+                            <img *ngIf="item.hasPhoto == 1" src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{item.tkid}}.jpg" onError="this.onerror=null;this.src='assets/images/noPhoto.jpg'"/> 
                             <img *ngIf="item.hasPhoto == 0" src="assets/images/noPhoto.jpg"/> 
                         </ion-thumbnail>
                         <strong>{{item.fullName}}</strong><br/>

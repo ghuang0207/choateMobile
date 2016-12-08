@@ -221,6 +221,7 @@ export class ContactsRoot {
     else if (deptCode == 'All'){
       // get department contacts
       if (this.appService.allEmployees.length > 0){
+          setTimeout(()=>this.loader.dismiss(),5000);
           this.nav.setRoot(PeoplePage,this.appService.allEmployees);
       }
       // If all employees not yet loaded in service

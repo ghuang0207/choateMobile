@@ -20,7 +20,7 @@
       <ion-list>
             <ion-item style="margin:0px;padding:0px;">
               <ion-thumbnail item-left>
-                  <img *ngIf="profile.hasPhoto == 1" src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{profile.tkid}}.jpg" onerror="this.src='assets/images/noPhoto.jpg''"/> 
+                  <img *ngIf="profile.hasPhoto == 1" src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{profile.tkid}}.jpg" onerror="this.src='assets/images/noPhoto.jpg'"/> 
                   <img *ngIf="profile.hasPhoto == 0" src="assets/images/noPhoto.jpg"/> 
               </ion-thumbnail>
               <strong>{{profile.fullName}}</strong><br/>

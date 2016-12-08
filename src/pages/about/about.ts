@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-
-import { NavController } from 'ionic-angular';
+import { Storage } from '@ionic/storage';
+import { NavController,Platform } from 'ionic-angular';
 import { AppService } from '../../app/app.service';
 
 @Component({
@@ -13,10 +13,11 @@ export class AboutPage {
   public showInfo: boolean;
   public timer:any;
   
-  constructor(public navCtrl: NavController, public appService:AppService) {
+  constructor(public platform:Platform, public storage:Storage, public navCtrl: NavController, public appService:AppService) {
     this.device  = appService.getDeviceInfo();
     this.showInfo = appService.profileLoaded;
     this.timer = setInterval(()=> this.assignPerson(),2000);
+
     //this.profile = appService.profile;
     //appService.getLoginProfile(this.device["uuid"]);
   }
@@ -30,6 +31,9 @@ export class AboutPage {
 
     }
     public stopInterval(){
+        if (this.profile.fullName == null){
+            this.profile = null;
+        }
         clearInterval(this.timer);
         //this.showInfo = true;
     }

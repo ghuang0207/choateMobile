@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AppService } from '../../app/app.service';
 import {CallNumber, SQLite} from 'ionic-native';
+import { Storage } from '@ionic/storage';
 import { NavController, NavParams, MenuController,LoadingController } from 'ionic-angular';
 
 @Component({
@@ -35,7 +36,7 @@ export class PeoplePage {
         peopleTimer : any;
         peopleLoaded: boolean=false;
 
-  constructor(private menuCtrl: MenuController  ,public navCtrl: NavController, public appService: AppService, private navParams: NavParams, public loadingCtrl:LoadingController ) {
+  constructor(private menuCtrl: MenuController, public storage:Storage ,public navCtrl: NavController, public appService: AppService, private navParams: NavParams, public loadingCtrl:LoadingController ) {
       if (navParams.data.length){
         if(navParams.data.length > 0){
             this.employees = navParams.data;
@@ -64,6 +65,38 @@ export class PeoplePage {
         console.log(this.person);
         if(this.appService.profileLoaded == true){
             this.profileLoaded = true;
+            // When error from service look at Local storage
+            if (!this.person)
+            {
+                this.person= {};
+                this.storage.get("fullName").then((val)=>this.person.fullName = val);
+                this.storage.get("department").then((val)=>this.person.department = val);
+                this.storage.get("tkid").then((val)=>this.person.tkid=val);
+                this.storage.get("extension").then((val)=>this.person.extension=val);
+                this.storage.get("jobTitle").then((val)=>this.person.jobTitle=val);
+                this.storage.get("hasPhoto").then((val)=>this.person.hasPhoto = val);
+                this.appService.profile = this.person;
+            }
+            //When no profile update local storage to null
+            else if(this.person == "no profile"){
+                this.storage.set('fullName',null);
+                this.storage.set('department',null);
+                this.storage.set('jobTitle',null);
+                this.storage.set('extension',null);
+                this.storage.set('tkid',null);
+                this.storage.set('hasPhoto',null);
+                this.person = null;
+            }
+            //When service returns value update local storage with new values
+            else{
+                this.storage.set('fullName',this.person.fullName);
+                this.storage.set('department',this.person.department);
+                this.storage.set('jobTitle',this.person.jobTitle);
+                this.storage.set('extension',this.person.extension);
+                this.storage.set('tkid',this.person.tkid);
+                this.storage.set('hasPhoto',this.person.hasPhoto);
+            }
+            
             this.stopPersonInterval();
         }
 
