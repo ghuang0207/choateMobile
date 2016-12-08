@@ -25,8 +25,6 @@ export class AppService {
 
     // logged-in person profile
     private profileUrl = 'http://azlabchoate20160421.azurewebsites.net/api/profile/';
-    //private profileObservable: BehaviorSubject<any> = new BehaviorSubject({});
-    //public profile: Observable<any> = this.profileObservable.asObservable();
     public profile: any;
     public profileLoaded: boolean = false;
     // todo: an api to receive device object and return user profile
@@ -34,40 +32,6 @@ export class AppService {
     // SQLite section for favorit contacts
     public database: SQLite = null;
     public favoritPeople: any = [];
-
-    /*public getPeopleLogin() {
-      if(this.profile) {
-        // if `data` is available just return it as `Observable`
-        console.log("data from cached data");
-        return Observable.of(this.profile); 
-      } else if(this.profileObs) {
-        // if `this.observable` is set then the request is in progress
-        // return the `Observable` for the ongoing request
-        console.log("from observable");
-        return this.profileObs;
-      } else {
-        
-        // create the request, store the `Observable` for subsequent subscribers
-        this.profileObs = this.http.get(this.profileUrl+this.device["uuid"])
-        .map(response =>  {
-          // when the cached data is available we don't need the `Observable` reference anymore
-          this.profileObs = null;
-
-          if(response.status == 400) {
-            return "FAILURE";
-          } else if(response.status == 200) {
-              console.log(response);
-            this.profile = response.json();
-            
-            return this.profile;
-          }
-          // make it shared so more than one subscriber can get the result
-        })
-        .share();
-        console.log("data from server");
-        return this.profileObs;
-      }
-    }*/
 
     public getLoginProfile(uuid){
         console.log("geting profile");
@@ -80,19 +44,10 @@ export class AppService {
             //this.profile = response.json();
           },
           (err)=>{console.log("error thrown");this.profile=null;this.profileLoaded = true;console.log(err);});
-
-          //return this.profile;
-          //console.log(prof)
     }
-
-    /*public getProfile(){
-        return this.profileObservable.asObservable();
-        //return this.profile;
-    }*/
 
     public setAllEmployees(){
     let db = new SQLite();
-          //let db = window.openDatabase("data.db", "1.0", "default database",2*1024*1024);
     db.openDatabase({name: "data.db", location: "default"}).then(() => {
           db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid", []).then((data) => {
             console.log(data);
@@ -139,26 +94,6 @@ export class AppService {
       console.log(person);
        let db = new SQLite();
        db.openDatabase({name: "data.db", location: "default"}).then(() => {
-         
-           /* db.executeSql("SELECT tkid FROM people WHERE tkid=(?)", [person.tkid]).then((data) => {
-            if(data.rows.length > 0) {
-                db.executeSql(`DELETE FROM 
-                        people WHERE tkid=(?)
-                        `, [person.tkid]).then((data) => {
-                            console.log("INSERTED: " + JSON.stringify(data));
-                        }, (error) => {
-                            console.log("ERROR: " + JSON.stringify(error));
-                });
-            }
-            else{
-                db.executeSql(`INSERT INTO 
-                    people (tkid,fullName,email,department,jobTitle,extension,altPhone) 
-                        VALUES (?,?,?,?,?,?,?)
-                    `, [person.tkid,person.fullName,person.email,person.department,person.jobTitle,person.extension,person.altPhone]).then((data) => {
-                        console.log("INSERTED: " + JSON.stringify(data));
-                    }, (error) => {
-                        console.log("ERROR: " + JSON.stringify(error));
-                });*/
                 db.executeSql("SELECT tkid FROM favorites WHERE tkid=(?)", [person.tkid]).then((data) => {
                     if(data.rows.length > 0) {
                         db.executeSql(`DELETE FROM 
@@ -183,19 +118,9 @@ export class AppService {
         },
             (error) => {console.log(error);}
             )
-            //console.log("transaction 2: "+ person.tkid);
-
-            
-            
         }, (error) => {
             console.error("Unable to open database", error);
         });
-        /*
-       this.database.executeSql("INSERT INTO people (tkid) VALUES (tkid)", []).then((data) => {
-            console.log("INSERTED: " + JSON.stringify(data));
-        }, (error) => {
-            console.log("ERROR: " + JSON.stringify(error));
-        });*/
     }
 
     public removePersonFromFavorit(tkid){
@@ -255,41 +180,4 @@ export class AppService {
         });
       return tempEmployees;
     }
-
-    /*public getFavorites(){
-      let tempEmployees = [];
-      let favTKIDs = this.getFavoritPeopleList();
-      if (favTKIDs.length > 0)
-        tempEmployees = this.data.filter(function(obj){
-          return this.isFavorite(obj, favTKIDs);
-        });
-      return tempEmployees;
-    }
-     public isFavorite(employee, favTKIDs){
-        for (var index in favTKIDs){
-            if (favTKIDs[index].tkid == employee.tkid)
-                return true;
-        }
-        return false;
-    }*/
-
-    /*private extractData(res: Response) {
-
-        let body = res.json();
-        this.employees = body;
-        return body || { };
-    }
-    private handleError (error: Response | any) {
-    // In a real world app, we might use a remote logging infrastructure
-    let errMsg: string;
-    if (error instanceof Response) {
-      const body = error.json() || '';
-      const err = body.error || JSON.stringify(body);
-      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-    } else {
-      errMsg = error.message ? error.message : error.toString();
-    }
-    console.error(errMsg);
-    return Observable.throw(errMsg);
-  }*/
 }

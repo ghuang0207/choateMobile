@@ -32,6 +32,7 @@ export class PeoplePage {
         allEmployeeLength:number = 0;
         person: any;
         timer : any;
+        profileLoaded: boolean=false;;
 
   constructor(private menuCtrl: MenuController  ,public navCtrl: NavController, public appService: AppService, private navParams: NavParams, public loadingCtrl:LoadingController ) {
       if (navParams.data.length){
@@ -61,8 +62,7 @@ export class PeoplePage {
         this.person = this.appService.profile;
         console.log(this.person);
         if(this.appService.profileLoaded == true){
-            console.log("Profile");
-            console.log(this.appService.profile);
+            this.profileLoaded = true;
             this.stopInterval();
         }
 

@@ -305,7 +305,7 @@ export class ContactsRoot {
       let db = new SQLite();
        
       db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT people.* FROM people LEFT JOIN favorites on people.tkid=favorites.tkid WHERE people.departmentCode = (?)", [deptCode]).then((data) => {
+          db.executeSql("SELECT people.*,favorites.tkid as fav  FROM people LEFT JOIN favorites on people.tkid=favorites.tkid WHERE people.departmentCode = (?)", [deptCode]).then((data) => {
             console.log(data);
             if(data.rows.length > 0) {
               let emps=[];

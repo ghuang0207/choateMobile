@@ -3,15 +3,21 @@
       <button ion-button menuToggle>
           <ion-icon name="menu"></ion-icon>
       </button>
-    <ion-title>People @ Choate {{employees.length}}/{{allEmployeeLength}}</ion-title>
+    <ion-title>People {{employees.length}}/{{allEmployeeLength}}</ion-title>
   </ion-navbar>
 </ion-header>
+
 
 <ion-content>
     <!--<ion-refresher (ionRefresh)="doRefresh($event)" >
         <ion-refresher-content pullingText="Pull to refresh." refreshingText="Redirecting to all employees"></ion-refresher-content>
     </ion-refresher>-->
-    <ion-searchbar placeholder="Type to search name in this list" [(ngModel)]="searchTerm" (ngModelChange)="search($event)">
+    <ion-card *ngIf="!person && profileLoaded">
+            <ion-card-content>
+                You do not have access to the application. Contact the Solutions Development Team for registration. 
+            </ion-card-content>
+    </ion-card>
+    <ion-searchbar placeholder="Type to search name in this list" [(ngModel)]="searchTerm" (ngModelChange)="search($event)" *ngIf="person">
     </ion-searchbar>
     <ion-list *ngIf="person">
         <ion-card *ngIf="employees.length == 0 && !hasFavorites">
