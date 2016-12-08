@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { AppService } from '../../app/app.service';
 import {CallNumber, SQLite} from 'ionic-native';
-import {Observable} from 'rxjs/Rx';
 import { NavController, NavParams, MenuController,LoadingController } from 'ionic-angular';
 
 @Component({
@@ -125,7 +124,7 @@ export class PeoplePage {
           //Service error
         error =>  {this.errorMessage = <any>error; console.log("Error Service");});
   }
-  
+
   loadDataIntoSqlite(person, db){
       db.executeSql(`INSERT INTO 
                     people (tkid,fullName,email,department,jobTitle,extension,altPhone,departmentCode,hasPhoto) 

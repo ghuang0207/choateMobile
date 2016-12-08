@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 //import { RequestOptions, Request, Response, RequestMethod, Headers, Http, URLSearchParams } from '@angular/http';
 import { Http } from '@angular/http';
-import { Observable, BehaviorSubject } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Rx';
 import {SQLite} from "ionic-native"; // for SQLite
+import { Storage } from "@ionic/storage";
 
 
 //import 'rxjs/add/operator/map';
@@ -15,7 +16,7 @@ export class AppService {
     public allEmployees : any = [];
     public device: any;
     //Initialize the logged in user
-    constructor(private http: Http) {
+    constructor(private http: Http, public storage: Storage) {
     }
     
     // by george - for reference
@@ -42,6 +43,16 @@ export class AppService {
             this.profile = response.json();
             console.log(response.json());
             this.profileLoaded = true;
+            this.storage.set('fullName',this.profile.fullName);
+            this.storage.set('department',this.profile.department);
+            this.storage.set('JobTitle',this.profile.JobTitle);
+            this.storage.set('extension',this.profile.extension);
+            this.storage.set('tkid',this.profile.tkid);
+            this.storage.set('hasPhoto',this.profile.hasPhoto);
+            console.log("From Storage");
+            storage.get('fullName').then((val) => {
+                    console.log('Your name is', val);
+                });
             //this.profile = response.json();
           },
           (err)=>{console.log("error thrown");this.profile=null;this.profileLoaded = true;console.log(err);});
