@@ -177,8 +177,6 @@ export class ContactsRoot {
     this.loader.present();
     if(deptCode=="Fav"){
 
-      //let emps = this.appService.getFavorites();
-
       let db = new SQLite();
        // get my contacts
        db.openDatabase({name: "data.db", location: "default"}).then(() => {
@@ -222,43 +220,48 @@ export class ContactsRoot {
     }
     else if (deptCode == 'All'){
       // get department contacts
-      let db = new SQLite();
-      
-       
-      db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid", []).then((data) => {
-            console.log(data);
-            if(data.rows.length > 0) {
-              let emps=[];
-                for(var i = 0; i < data.rows.length; i++) {
-                    emps.push({
-                      tkid: data.rows.item(i).tkid,
-                      fullName: data.rows.item(i).fullName,
-                      department: data.rows.item(i).department,
-                      jobTitle: data.rows.item(i).jobTitle,
-                      departmentCode:data.rows.item(i).departmentCode,
-                      extension: data.rows.item(i).extension,
-                      altPhone: data.rows.item(i).altPhone,
-                      email: data.rows.item(i).email,
-                      hasPhoto: data.rows.item(i).hasPhoto,
-                      isFavorite: (data.rows.item(i).fav == null)?0:1
-                    });
+      if (this.appService.allEmployees.length > 0){
+          this.nav.setRoot(PeoplePage,this.appService.allEmployees);
+      }
+      // If all employees not yet loaded in service
+      else{
+          let db = new SQLite();
+    
+          db.openDatabase({name: "data.db", location: "default"}).then(() => {
+              db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid", []).then((data) => {
+                console.log(data);
+                if(data.rows.length > 0) {
+                  let emps=[];
+                    for(var i = 0; i < data.rows.length; i++) {
+                        emps.push({
+                          tkid: data.rows.item(i).tkid,
+                          fullName: data.rows.item(i).fullName,
+                          department: data.rows.item(i).department,
+                          jobTitle: data.rows.item(i).jobTitle,
+                          departmentCode:data.rows.item(i).departmentCode,
+                          extension: data.rows.item(i).extension,
+                          altPhone: data.rows.item(i).altPhone,
+                          email: data.rows.item(i).email,
+                          hasPhoto: data.rows.item(i).hasPhoto,
+                          isFavorite: (data.rows.item(i).fav == null)?0:1
+                        });
+                    }
+                    console.log(emps);
+                    this.loader.dismiss();
+                    this.nav.setRoot(PeoplePage,emps);
+                    
                 }
-                console.log(emps);
-                this.loader.dismiss();
-                this.nav.setRoot(PeoplePage,emps);
-                
-            }
-            else{
+                else{
+                  this.loader.dismiss();
+                }
+            }, (error) => {
               this.loader.dismiss();
-            }
-        }, (error) => {
-          this.loader.dismiss();
-            this.nav.setRoot(PeoplePage,this.employees);
-            console.log("ERROR: " + JSON.stringify(error));
-        });
-         },
-       (error) => {console.log(error)});
+                this.nav.setRoot(PeoplePage,this.employees);
+                console.log("ERROR: " + JSON.stringify(error));
+            });
+            },
+          (error) => {console.log(error)});
+      }
     }
     else if (deptCode == 'SEC'){
       // get department contacts

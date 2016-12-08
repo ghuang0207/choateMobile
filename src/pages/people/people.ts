@@ -31,8 +31,10 @@ export class PeoplePage {
         hasFavorites: boolean = true;
         allEmployeeLength:number = 0;
         person: any;
-        timer : any;
-        profileLoaded: boolean=false;;
+        personTimer : any;
+        profileLoaded: boolean=false;
+        peopleTimer : any;
+        peopleLoaded: boolean=false;
 
   constructor(private menuCtrl: MenuController  ,public navCtrl: NavController, public appService: AppService, private navParams: NavParams, public loadingCtrl:LoadingController ) {
       if (navParams.data.length){
@@ -40,7 +42,6 @@ export class PeoplePage {
             this.employees = navParams.data;
             this.allEmployees = navParams.data;
             this.hasFavorites = true;    
-            this.allEmployeeLength = appService.allEmployees.length;
         }
             
         else{
@@ -52,7 +53,8 @@ export class PeoplePage {
           this.employees= [];
           this.hasFavorites = false;
       }
-        this.timer = setInterval(()=> this.assignPerson(),2000);
+        this.personTimer = setInterval(()=> this.assignPerson(),2000);
+        this.peopleTimer = setInterval(()=> this.assignPeople(),2000);
         //appService.getPeopleLogin().subscribe(res=>{console.log(res);this.person=res;})
         
     }
@@ -63,13 +65,28 @@ export class PeoplePage {
         console.log(this.person);
         if(this.appService.profileLoaded == true){
             this.profileLoaded = true;
-            this.stopInterval();
+            this.stopPersonInterval();
         }
 
     }
-    public stopInterval(){
-        clearInterval(this.timer);
+    public stopPersonInterval(){
+        clearInterval(this.personTimer);
     }
+
+    public assignPeople(){
+        
+        //this.person = this.appService.profile;
+        this.allEmployeeLength = this.appService.allEmployees.length;
+        if(this.appService.peopleLoaded == true){
+            this.peopleLoaded = true;
+            this.stopPeopleInterval();
+        }
+
+    }
+    public stopPeopleInterval(){
+        clearInterval(this.peopleTimer);
+    }
+
 
      public doRefresh(refresher) {
             console.log('Begin async operation', refresher);
@@ -108,6 +125,7 @@ export class PeoplePage {
           //Service error
         error =>  {this.errorMessage = <any>error; console.log("Error Service");});
   }
+  
   loadDataIntoSqlite(person, db){
       db.executeSql(`INSERT INTO 
                     people (tkid,fullName,email,department,jobTitle,extension,altPhone,departmentCode,hasPhoto) 
@@ -131,41 +149,9 @@ export class PeoplePage {
         }
     }
     favorite(item){
-        
         this.appService.toggleFavorite(item);
         
         item.isFavorite = !item.isFavorite;
-        
-        
-        
-
-        //this.employees = [];
-        /*let db = new SQLite();
-       
-      db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT * FROM people WHERE tkid in (SELECT tkid from favorites)", []).then((data) => {
-            console.log("Refresh data", data);
-            if(data.rows.length > 0) {
-                for(var i = 0; i < data.rows.length; i++) {
-                    this.employees.push({
-                      tkid: data.rows.item(i).tkid,
-                      fullName: data.rows.item(i).fullName,
-                      department: data.rows.item(i).department,
-                      jobTitle: data.rows.item(i).jobTitle,
-                      departmentCode:data.rows.item(i).departmentCode,
-                      extension: data.rows.item(i).extension,
-                      altPhone: data.rows.item(i).altPhone,
-                      email: data.rows.item(i).email,
-                      hasPhoto: data.rows.item(i).hasPhoto
-                    });
-                }
-            }
-        }, (error) => {
-            console.log("ERROR: " + JSON.stringify(error));
-        });
-         },
-       (error) => {console.log(error)});*/
-        //this.employees.splice(item,1);
     }
 
 
@@ -184,38 +170,10 @@ export class PeoplePage {
     }
     
   ionViewDidLoad() {
-      console.log("subscribe");
-       /*this.appService.profileObservable.subscribe(result=>{
-           this.person=result;
-           console.log(result);
-        });*/
-        //this.obs = this.appService.getProfile(); 
-        console.log("Init for people");
-        
-        //setTimeout(()=>{this.obs.subscribe(res=>{console.log(res);})},10000);
-        /*this.appService.getProfile().subscribe(
-            res => {
-                console.log("mess");
-                console.log(res);
-                //console.log(res);
-            }
-        );*/
-        /*.subscribe(response => {
-            this.person=response;
-            console.log("load bview");
-            console.log(response);
-        });        
-        //console.log(this.person);
-        console.log("from service");
 
-        //console.log(this.appService.profile);
-      /*if (!this.navParams.data.length)
-        this.appService.getPeople().subscribe(
-                       employee  => { this.employees=employee;},
-                       error =>  this.errorMessage = <any>error);*/
     }
 
   itemSelected(item){
-      //console.log(item);
+      
   }
 }

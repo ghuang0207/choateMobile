@@ -27,6 +27,7 @@ export class AppService {
     private profileUrl = 'http://azlabchoate20160421.azurewebsites.net/api/profile/';
     public profile: any;
     public profileLoaded: boolean = false;
+    public peopleLoaded: boolean = false;
     // todo: an api to receive device object and return user profile
 
     // SQLite section for favorit contacts
@@ -68,9 +69,11 @@ export class AppService {
                     });
                 }
                 this.allEmployees = emps;
+                this.peopleLoaded = true;
             }
            
         }, (error) => {
+            this.peopleLoaded = true;
             console.log("ERROR: " + JSON.stringify(error));
         });
          },
