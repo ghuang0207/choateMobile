@@ -15,6 +15,7 @@ export class AppService {
     employees : any = [];
     public allEmployees : any = [];
     public device: any;
+    public db:SQLite;
     //Initialize the logged in user
     constructor(private http: Http, public storage: Storage) {
     }
@@ -40,21 +41,8 @@ export class AppService {
         console.log("geting profile");
         //this.profileObservable = 
         this.profile = this.http.get(this.profileUrl+uuid).subscribe(response =>  {
-            console.log("profile");
             this.profile = response.json();
-            console.log(response.json());
             this.profileLoaded = true;
-            /*this.storage.set('fullName',this.profile.fullName);
-            this.storage.set('department',this.profile.department);
-            this.storage.set('JobTitle',this.profile.JobTitle);
-            this.storage.set('extension',this.profile.extension);
-            this.storage.set('tkid',this.profile.tkid);
-            this.storage.set('hasPhoto',this.profile.hasPhoto);
-            console.log("From Storage");
-            this.storage.get('fullName').then((val) => {
-                    console.log('Your name is', val);
-                });*/
-            //this.profile = response.json();
           },
           (err)=>{console.log("error thrown");this.profile=null;this.profileLoaded = true;console.log(err);});
     }
@@ -91,6 +79,14 @@ export class AppService {
          },
        (error) => {console.log(error)});
 
+    }
+
+    public getDB(){
+        return this.db;
+    }
+
+    public setDB(db){
+        this.db = db;
     }
 
     public getAllEmployees(){
