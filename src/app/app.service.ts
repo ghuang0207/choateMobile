@@ -50,7 +50,7 @@ export class AppService {
             this.storage.set('tkid',this.profile.tkid);
             this.storage.set('hasPhoto',this.profile.hasPhoto);
             console.log("From Storage");
-            storage.get('fullName').then((val) => {
+            this.storage.get('fullName').then((val) => {
                     console.log('Your name is', val);
                 });
             //this.profile = response.json();
