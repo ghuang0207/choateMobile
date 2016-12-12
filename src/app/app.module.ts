@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { IonicApp, IonicModule } from 'ionic-angular';
+import { Storage } from '@ionic/storage';
 import { MyApp } from './app.component';
 import { AboutPage } from '../pages/about/about';
 import { DailyMeasurePage } from '../pages/dailyMeasure/dailyMeasure';
@@ -32,6 +33,9 @@ import {DailyRoot} from '../pages/daily-root/daily-root';
     ContactsRoot,
     DailyRoot
   ],
-  providers: [AppService]
+  providers: [
+    AppService,
+    Storage
+  ]
 })
 export class AppModule {}

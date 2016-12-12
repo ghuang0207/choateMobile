@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 import {SQLite} from "ionic-native"; // for SQLite
-import { Storage } from "@ionic/storage";
+import { Storage } from '@ionic/storage';
 
 
 //import 'rxjs/add/operator/map';
@@ -15,6 +15,7 @@ export class AppService {
     employees : any = [];
     public allEmployees : any = [];
     public device: any;
+    public db:SQLite;
     //Initialize the logged in user
     constructor(private http: Http, public storage: Storage) {
     }
@@ -30,6 +31,7 @@ export class AppService {
     public profileLoaded: boolean = false;
     public peopleLoaded: boolean = false;
     // todo: an api to receive device object and return user profile
+    
 
     // SQLite section for favorit contacts
     public database: SQLite = null;
@@ -39,9 +41,7 @@ export class AppService {
         console.log("geting profile");
         //this.profileObservable = 
         this.profile = this.http.get(this.profileUrl+uuid).subscribe(response =>  {
-            console.log("profile");
             this.profile = response.json();
-            console.log(response.json());
             this.profileLoaded = true;
             this.storage.set('fullName',this.profile.fullName);
             this.storage.set('department',this.profile.department);
@@ -92,6 +92,14 @@ export class AppService {
 
     }
 
+    public getDB(){
+        return this.db;
+    }
+
+    public setDB(db){
+        this.db = db;
+    }
+
     public getAllEmployees(){
         return this.allEmployees;
     }
@@ -101,6 +109,22 @@ export class AppService {
     }
     public setDeviceInfo(d){
         this.device = d;
+        if (!this.device.serial){
+            this.device.serial = "N/A";
+        }
+        console.log("device info set");
+        console.log(this.device);
+        let auditInfo = {};
+        auditInfo["UUID"] = this.device.uuid;
+        auditInfo["Platform"] = this.device.platform;
+        auditInfo["Model"] = this.device.model;
+        auditInfo["Serial"] = this.device.serial;
+        auditInfo["OSVersion"] = this.device.version;
+        auditInfo["AppVersion"] = this.device.appversion;
+        //Call the post
+        this.http.post(this.profileUrl,auditInfo).subscribe((res) =>{
+                console.log("Audit Success");
+        },(err)=>{console.log("Audit Error");console.log(err)});
     }
     
 

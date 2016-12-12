@@ -26,7 +26,7 @@ export class ContactsRoot {
   loader: any;
 
   rootPage: any = PeoplePage;
-  constructor(public platform: Platform, private menuCtrl: MenuController ,public navCtrl: NavController, private appService: AppService, public loadingCtrl:LoadingController) {
+  constructor(public platform: Platform, private menuCtrl: MenuController ,public navCtrl: NavController, public appService: AppService, public loadingCtrl:LoadingController) {
     this.status = "checking database...";
     this.loader = loadingCtrl.create({content: this.status});
     this.loader.present();
@@ -34,11 +34,54 @@ export class ContactsRoot {
                        employee  => { this.employees=employee; loader.dismiss(); this.loadingComplete = 1;},
                        error =>  this.errorMessage = <any>error);*/
     platform.ready().then(() => {
-      
+        /*let db = appService.getDB();
+        db.executeSql(`CREATE TABLE IF NOT EXISTS people (
+                    tkid TEXT PRIMARY KEY, 
+                    department TEXT,
+                    fullName Text,
+                    jobTitle TEXT,
+                    extension TEXT,
+                    email TEXT,
+                    departmentCode TEXT,
+                    altPhone TEXT,
+                    hasPhoto INTEGER
+                )`, {}).then((data) => {
+                    console.log("People table is ready: ", data);
+                }, (error) => {
+                    console.error("Unable to execute sql", error);
+                });
+            this.status = "prepare favorites table...";
+            // create favorites table
+            db.executeSql(`CREATE TABLE IF NOT EXISTS favorites (
+                tkid TEXT PRIMARY KEY
+            )`, {}).then((data) => {
+                console.log("Favorites table is ready: ", data);
+            }, (error) => {
+                console.error("Unable to execute sql", error);
+            });
+
+            // test to see if there is data in the people table
+            appService.db.executeSql("SELECT tkid from people",[]).then((data) =>{
+              console.log('init data',data);
+              if(data.rows.length == 0)
+              {
+                //if no data, go on the internet and pull data from cloud server.
+                this.status = "fetching data from cloud...";
+                this.refreshSqliteDb(db);
+              }
+              else
+              {
+                // otherwise, pull data directly from database
+                this.status = "get data from table...";
+                console.log("data from db");
+                this.loadData(db);
+              }
+              },
+                (error) =>{console.log("Error");});*/
+
+        
           let db = new SQLite();
-          //let db = window.openDatabase("data.db", "1.0", "default database",2*1024*1024);
-          db.openDatabase({name: "data.db", location: "default"}).then(() => { 
-          //openDatabase("data.db", "1.0", "default database",2*1024*1024).then(() => {
+          db.openDatabase({name: "data.db", location: "default"}).then(() => {        
             // create people table if not exists
             this.status = "prepare people table...";            
             db.executeSql(`CREATE TABLE IF NOT EXISTS people (
@@ -171,18 +214,9 @@ export class ContactsRoot {
                 });
 
   }
-
-  getDepartmentMembers(deptCode : string){
-    this.loader = this.loadingCtrl.create({content:"Loading"});
-    this.loader.present();
-    if(deptCode=="Fav"){
-
-      let db = new SQLite();
-       // get my contacts
-       db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT people.tkid,people.fullName, people.extension, people.email,people.altPhone,people.jobTitle,people.department,people.departmentCode,people.hasPhoto FROM favorites JOIN people ON favorites.tkid = people.tkid", []).then((data) => {
-            if(data.rows.length > 0) {
-              let emps=[];
+  //helper function to build emps
+  buildEmps(data){
+    let emps=[];
                 for(var i = 0; i < data.rows.length; i++) {
                     emps.push({
                       tkid: data.rows.item(i).tkid,
@@ -194,9 +228,38 @@ export class ContactsRoot {
                       altPhone: data.rows.item(i).altPhone,
                       email: data.rows.item(i).email,
                       hasPhoto: data.rows.item(i).hasPhoto,
-                      isFavorite:1
+                      isFavorite:(data.rows.item(i).fav == null)?0:1
                     });
                 }
+      return emps;
+  }
+
+  getDepartmentMembers(deptCode : string){
+    this.loader = this.loadingCtrl.create({content:"Loading"});
+    this.loader.present();
+    if(deptCode=="Fav"){
+
+      let db = new SQLite();
+       // get my contacts
+       db.openDatabase({name: "data.db", location: "default"}).then(() => {
+          db.executeSql("SELECT people.tkid,people.fullName, people.extension, people.email,people.altPhone,people.jobTitle,people.department,people.departmentCode,people.hasPhoto,favorites.tkid as fav FROM favorites JOIN people ON favorites.tkid = people.tkid", []).then((data) => {
+            if(data.rows.length > 0) {
+                let emps = this.buildEmps(data);
+                /*for(var i = 0; i < data.rows.length; i++) {
+                    emps.push({
+                      tkid: data.rows.item(i).tkid,
+                      fullName: data.rows.item(i).fullName,
+                      department: data.rows.item(i).department,
+                      jobTitle: data.rows.item(i).jobTitle,
+                      departmentCode:data.rows.item(i).departmentCode,
+                      extension: data.rows.item(i).extension,
+                      altPhone: data.rows.item(i).altPhone,
+                      email: data.rows.item(i).email,
+                      hasPhoto: data.rows.item(i).hasPhoto,
+                      isFavorite:(data.rows.item(i).fav == null)?0:1
+                    });
+                }*/
+
                 this.loader.dismiss();
                 this.nav.setRoot(PeoplePage,emps);
             }
@@ -221,6 +284,7 @@ export class ContactsRoot {
     else if (deptCode == 'All'){
       // get department contacts
       if (this.appService.allEmployees.length > 0){
+          setTimeout(()=>this.loader.dismiss(),5000);
           this.nav.setRoot(PeoplePage,this.appService.allEmployees);
       }
       // If all employees not yet loaded in service
@@ -229,10 +293,10 @@ export class ContactsRoot {
     
           db.openDatabase({name: "data.db", location: "default"}).then(() => {
               db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid", []).then((data) => {
-                console.log(data);
+                //console.log(data);
                 if(data.rows.length > 0) {
-                  let emps=[];
-                    for(var i = 0; i < data.rows.length; i++) {
+                  let emps = this.buildEmps(data);
+                    /*for(var i = 0; i < data.rows.length; i++) {
                         emps.push({
                           tkid: data.rows.item(i).tkid,
                           fullName: data.rows.item(i).fullName,
@@ -246,7 +310,7 @@ export class ContactsRoot {
                           isFavorite: (data.rows.item(i).fav == null)?0:1
                         });
                     }
-                    console.log(emps);
+                    console.log(emps);*/
                     this.loader.dismiss();
                     this.nav.setRoot(PeoplePage,emps);
                     
@@ -272,8 +336,9 @@ export class ContactsRoot {
           db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid WHERE people.departmentCode like (?)", ["SEC%"]).then((data) => {
             console.log(data);
             if(data.rows.length > 0) {
-              let emps=[];
-                for(var i = 0; i < data.rows.length; i++) {
+              //let emps=[];
+              let emps = this.buildEmps(data);
+                /*for(var i = 0; i < data.rows.length; i++) {
                     emps.push({
                       tkid: data.rows.item(i).tkid,
                       fullName: data.rows.item(i).fullName,
@@ -287,7 +352,7 @@ export class ContactsRoot {
                       isFavorite: (data.rows.item(i).fav == null)?0:1
                     });
                 }
-                console.log(emps);
+                console.log(emps);*/
                 this.loader.dismiss();
                 this.nav.setRoot(PeoplePage,emps);
                 
@@ -311,7 +376,8 @@ export class ContactsRoot {
           db.executeSql("SELECT people.*,favorites.tkid as fav  FROM people LEFT JOIN favorites on people.tkid=favorites.tkid WHERE people.departmentCode = (?)", [deptCode]).then((data) => {
             console.log(data);
             if(data.rows.length > 0) {
-              let emps=[];
+              let emps = this.buildEmps(data);
+              /*let emps=[];
                 for(var i = 0; i < data.rows.length; i++) {
                     emps.push({
                       tkid: data.rows.item(i).tkid,
@@ -326,7 +392,7 @@ export class ContactsRoot {
                       isFavorite: (data.rows.item(i).fav == null)?0:1
                     });
                 }
-                console.log(emps);
+                console.log(emps);*/
                 this.loader.dismiss();
                 this.nav.setRoot(PeoplePage,emps);
             }
