@@ -31,8 +31,12 @@ export class AboutPage {
 
     }
     public stopInterval(){
+        
         if (this.profile.fullName == null){
             this.profile = null;
+        }
+        else{
+            this.profile.extension = "617-248-" + this.profile.extension;
         }
         clearInterval(this.timer);
         //this.showInfo = true;

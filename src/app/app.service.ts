@@ -15,7 +15,7 @@ export class AppService {
     employees : any = [];
     public allEmployees : any = [];
     public device: any;
-    public db:SQLite;
+    public db:Promise<any>;
     //Initialize the logged in user
     constructor(private http: Http, public storage: Storage) {
     }
@@ -39,56 +39,44 @@ export class AppService {
 
     public getLoginProfile(uuid){
         console.log("geting profile");
-        //this.profileObservable = 
         this.profile = this.http.get(this.profileUrl+uuid).subscribe(response =>  {
             this.profile = response.json();
             this.profileLoaded = true;
-            /*this.storage.set('fullName',this.profile.fullName);
-            this.storage.set('department',this.profile.department);
-            this.storage.set('jobTitle',this.profile.jobTitle);
-            this.storage.set('extension',this.profile.extension);
-            this.storage.set('tkid',this.profile.tkid);
-            this.storage.set('hasPhoto',this.profile.hasPhoto);
-            console.log("From Storage");
-            this.storage.get('fullName').then((val) => {
-                    console.log('Your name is', val);
-                });*/
-            //this.profile = response.json();
           },
           (err)=>{console.log("error thrown");this.profile=null;this.profileLoaded = true;console.log(err);});
     }
 
     public setAllEmployees(){
-    let db = new SQLite();
-    db.openDatabase({name: "data.db", location: "default"}).then(() => {
-          db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid", []).then((data) => {
-            console.log(data);
-            if(data.rows.length > 0) {
-              let emps=[];
-                for(var i = 0; i < data.rows.length; i++) {
-                    emps.push({
-                      tkid: data.rows.item(i).tkid,
-                      fullName: data.rows.item(i).fullName,
-                      department: data.rows.item(i).department,
-                      jobTitle: data.rows.item(i).jobTitle,
-                      departmentCode:data.rows.item(i).departmentCode,
-                      extension: data.rows.item(i).extension,
-                      altPhone: data.rows.item(i).altPhone,
-                      email: data.rows.item(i).email,
-                      hasPhoto: data.rows.item(i).hasPhoto,
-                      isFavorite: (data.rows.item(i).fav == null)?0:1
-                    });
+        let db = new SQLite();
+        db.openDatabase({name: "data.db", location: "default"}).then(() => {
+                db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid", []).then((data) => {
+                console.log(data);
+                if(data.rows.length > 0) {
+                    let emps=[];
+                    for(var i = 0; i < data.rows.length; i++) {
+                        emps.push({
+                            tkid: data.rows.item(i).tkid,
+                            fullName: data.rows.item(i).fullName,
+                            department: data.rows.item(i).department,
+                            jobTitle: data.rows.item(i).jobTitle,
+                            departmentCode:data.rows.item(i).departmentCode,
+                            extension: data.rows.item(i).extension,
+                            altPhone: data.rows.item(i).altPhone,
+                            email: data.rows.item(i).email,
+                            hasPhoto: data.rows.item(i).hasPhoto,
+                            isFavorite: (data.rows.item(i).fav == null)?0:1
+                        });
+                    }
+                    this.allEmployees = emps;
+                    this.peopleLoaded = true;
                 }
-                this.allEmployees = emps;
+                
+            }, (error) => {
                 this.peopleLoaded = true;
-            }
-           
-        }, (error) => {
-            this.peopleLoaded = true;
-            console.log("ERROR: " + JSON.stringify(error));
-        });
-         },
-       (error) => {console.log(error)});
+                console.log("ERROR: " + JSON.stringify(error));
+            });
+                },
+            (error) => {console.log(error)});
 
     }
 
@@ -113,7 +101,6 @@ export class AppService {
             this.device.serial = "N/A";
         }
         console.log("device info set");
-        console.log(this.device);
         let auditInfo = {};
         auditInfo["UUID"] = this.device.uuid;
         auditInfo["Platform"] = this.device.platform;

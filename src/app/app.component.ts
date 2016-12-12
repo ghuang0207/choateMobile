@@ -3,7 +3,7 @@ import { Storage } from '@ionic/storage';
 import { Platform } from 'ionic-angular';
 import { AppService } from '../app/app.service';
 import { TabsPage } from '../pages/tabs/tabs';
-import { StatusBar, Splashscreen, Device, AppVersion, SQLite } from 'ionic-native';
+import { StatusBar, Splashscreen, Device, AppVersion } from 'ionic-native';
 
 
 @Component({
@@ -20,21 +20,6 @@ export class MyApp {
       Splashscreen.hide();
 
       // grab the device information - query db table to identify the login
-      debugger;
-      // init SQLite
-       /*let db = new SQLite();
-       db.openDatabase({
-            name: "data.db",
-            location: "default"
-        }).then(() => {
-        }, (error) => {
-            console.error("Unable to open database", error);
-        });
-        appService.setDB(db);*/
-      console.log("UUID",Device.device.uuid);
-      console.log("Device",Device.device);
-      console.log("Model",Device.device.model);
-      console.log("Version",Device.device.version);
       let d = Device.device;
       
       AppVersion.getVersionNumber().then((appversion) => {
@@ -44,13 +29,7 @@ export class MyApp {
        );
     
       appService.setAllEmployees();
-
       appService.getLoginProfile(d["uuid"]);
-      storage.set("Key",Device.device.uuid);
-      
-
-      //appService.getPeopleLogin().subscribe(res=>{console.log("First Profile");console.log(res);});
-
 
     });
   }

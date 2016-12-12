@@ -30,56 +30,8 @@ export class ContactsRoot {
     this.status = "checking database...";
     this.loader = loadingCtrl.create({content: this.status});
     this.loader.present();
-    /*this.appService.getPeople().subscribe(
-                       employee  => { this.employees=employee; loader.dismiss(); this.loadingComplete = 1;},
-                       error =>  this.errorMessage = <any>error);*/
     platform.ready().then(() => {
-        /*let db = appService.getDB();
-        db.executeSql(`CREATE TABLE IF NOT EXISTS people (
-                    tkid TEXT PRIMARY KEY, 
-                    department TEXT,
-                    fullName Text,
-                    jobTitle TEXT,
-                    extension TEXT,
-                    email TEXT,
-                    departmentCode TEXT,
-                    altPhone TEXT,
-                    hasPhoto INTEGER
-                )`, {}).then((data) => {
-                    console.log("People table is ready: ", data);
-                }, (error) => {
-                    console.error("Unable to execute sql", error);
-                });
-            this.status = "prepare favorites table...";
-            // create favorites table
-            db.executeSql(`CREATE TABLE IF NOT EXISTS favorites (
-                tkid TEXT PRIMARY KEY
-            )`, {}).then((data) => {
-                console.log("Favorites table is ready: ", data);
-            }, (error) => {
-                console.error("Unable to execute sql", error);
-            });
-
-            // test to see if there is data in the people table
-            appService.db.executeSql("SELECT tkid from people",[]).then((data) =>{
-              console.log('init data',data);
-              if(data.rows.length == 0)
-              {
-                //if no data, go on the internet and pull data from cloud server.
-                this.status = "fetching data from cloud...";
-                this.refreshSqliteDb(db);
-              }
-              else
-              {
-                // otherwise, pull data directly from database
-                this.status = "get data from table...";
-                console.log("data from db");
-                this.loadData(db);
-              }
-              },
-                (error) =>{console.log("Error");});*/
-
-        
+      
           let db = new SQLite();
           db.openDatabase({name: "data.db", location: "default"}).then(() => {        
             // create people table if not exists
@@ -136,7 +88,6 @@ export class ContactsRoot {
 
 
           this.loader.dismiss();
-
           this.loadingComplete = 1;
     });
 
@@ -144,13 +95,13 @@ export class ContactsRoot {
   }
 
     public doRefresh() {          
-            let db = new SQLite();            
-             db.openDatabase({name: "data.db", location: "default"}).then(() => {
-                this.refreshSqliteDb(db);                
-                this.getDepartmentMembers("All");
-             }, (error) => {
-                 console.log(error);
-             }); 
+        let db = new SQLite();            
+          db.openDatabase({name: "data.db", location: "default"}).then(() => {
+            this.refreshSqliteDb(db);                
+            this.getDepartmentMembers("All");
+          }, (error) => {
+              console.log(error);
+          }); 
     }
 
 
@@ -237,7 +188,6 @@ export class ContactsRoot {
     this.loader = this.loadingCtrl.create({content:"Loading"});
     this.loader.present();
     if(deptCode=="Fav"){
-
       let db = new SQLite();
        // get my contacts
        db.openDatabase({name: "data.db", location: "default"}).then(() => {
