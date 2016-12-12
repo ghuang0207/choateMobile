@@ -118,20 +118,19 @@ export class ContactsRoot {
                 this.status = "fetching data from cloud...";
                 this.refreshSqliteDb(db);
               }
-              else
+              /*else
               {
                 // otherwise, pull data directly from database
                 this.status = "get data from table...";
                 console.log("data from db");
                 this.loadData(db);
-              }
+              }*/
               },
                 (error) =>{console.log("Error");});
             },
             //open db error
             (error) => {
               this.refreshSqliteDb(db);
-              console.log(this.employees);
               console.log(error);
             });
 
@@ -245,31 +244,16 @@ export class ContactsRoot {
           db.executeSql("SELECT people.tkid,people.fullName, people.extension, people.email,people.altPhone,people.jobTitle,people.department,people.departmentCode,people.hasPhoto,favorites.tkid as fav FROM favorites JOIN people ON favorites.tkid = people.tkid", []).then((data) => {
             if(data.rows.length > 0) {
                 let emps = this.buildEmps(data);
-                /*for(var i = 0; i < data.rows.length; i++) {
-                    emps.push({
-                      tkid: data.rows.item(i).tkid,
-                      fullName: data.rows.item(i).fullName,
-                      department: data.rows.item(i).department,
-                      jobTitle: data.rows.item(i).jobTitle,
-                      departmentCode:data.rows.item(i).departmentCode,
-                      extension: data.rows.item(i).extension,
-                      altPhone: data.rows.item(i).altPhone,
-                      email: data.rows.item(i).email,
-                      hasPhoto: data.rows.item(i).hasPhoto,
-                      isFavorite:(data.rows.item(i).fav == null)?0:1
-                    });
-                }*/
-
-                this.loader.dismiss();
+                setTimeout(()=>this.loader.dismiss(),2000);
                 this.nav.setRoot(PeoplePage,emps);
             }
             else{
-              this.loader.dismiss();
+              setTimeout(()=>this.loader.dismiss(),2000);
               let emps = [];
               this.nav.setRoot(PeoplePage,emps);              
             }
         }, (error) => {
-          this.loader.dismiss();
+          setTimeout(()=>this.loader.dismiss(),2000);
             this.nav.setRoot(PeoplePage,this.employees);
             console.log("ERROR: " + JSON.stringify(error));
         });
@@ -296,30 +280,15 @@ export class ContactsRoot {
                 //console.log(data);
                 if(data.rows.length > 0) {
                   let emps = this.buildEmps(data);
-                    /*for(var i = 0; i < data.rows.length; i++) {
-                        emps.push({
-                          tkid: data.rows.item(i).tkid,
-                          fullName: data.rows.item(i).fullName,
-                          department: data.rows.item(i).department,
-                          jobTitle: data.rows.item(i).jobTitle,
-                          departmentCode:data.rows.item(i).departmentCode,
-                          extension: data.rows.item(i).extension,
-                          altPhone: data.rows.item(i).altPhone,
-                          email: data.rows.item(i).email,
-                          hasPhoto: data.rows.item(i).hasPhoto,
-                          isFavorite: (data.rows.item(i).fav == null)?0:1
-                        });
-                    }
-                    console.log(emps);*/
-                    this.loader.dismiss();
+                    setTimeout(()=>this.loader.dismiss(),2000);
                     this.nav.setRoot(PeoplePage,emps);
                     
                 }
                 else{
-                  this.loader.dismiss();
+                  setTimeout(()=>this.loader.dismiss(),2000);
                 }
             }, (error) => {
-              this.loader.dismiss();
+              setTimeout(()=>this.loader.dismiss(),2000);
                 this.nav.setRoot(PeoplePage,this.employees);
                 console.log("ERROR: " + JSON.stringify(error));
             });
@@ -338,30 +307,15 @@ export class ContactsRoot {
             if(data.rows.length > 0) {
               //let emps=[];
               let emps = this.buildEmps(data);
-                /*for(var i = 0; i < data.rows.length; i++) {
-                    emps.push({
-                      tkid: data.rows.item(i).tkid,
-                      fullName: data.rows.item(i).fullName,
-                      department: data.rows.item(i).department,
-                      jobTitle: data.rows.item(i).jobTitle,
-                      departmentCode:data.rows.item(i).departmentCode,
-                      extension: data.rows.item(i).extension,
-                      altPhone: data.rows.item(i).altPhone,
-                      email: data.rows.item(i).email,
-                      hasPhoto: data.rows.item(i).hasPhoto,
-                      isFavorite: (data.rows.item(i).fav == null)?0:1
-                    });
-                }
-                console.log(emps);*/
-                this.loader.dismiss();
+                setTimeout(()=>this.loader.dismiss(),2000);
                 this.nav.setRoot(PeoplePage,emps);
                 
             }
             else{
-              this.loader.dismiss();
+              setTimeout(()=>this.loader.dismiss(),2000);
             }
         }, (error) => {
-          this.loader.dismiss();
+          setTimeout(()=>this.loader.dismiss(),2000);
             this.nav.setRoot(PeoplePage,this.employees);
             console.log("ERROR: " + JSON.stringify(error));
         });
@@ -377,30 +331,14 @@ export class ContactsRoot {
             console.log(data);
             if(data.rows.length > 0) {
               let emps = this.buildEmps(data);
-              /*let emps=[];
-                for(var i = 0; i < data.rows.length; i++) {
-                    emps.push({
-                      tkid: data.rows.item(i).tkid,
-                      fullName: data.rows.item(i).fullName,
-                      department: data.rows.item(i).department,
-                      jobTitle: data.rows.item(i).jobTitle,
-                      departmentCode:data.rows.item(i).departmentCode,
-                      extension: data.rows.item(i).extension,
-                      altPhone: data.rows.item(i).altPhone,
-                      email: data.rows.item(i).email,
-                      hasPhoto: data.rows.item(i).hasPhoto,
-                      isFavorite: (data.rows.item(i).fav == null)?0:1
-                    });
-                }
-                console.log(emps);*/
-                this.loader.dismiss();
+                setTimeout(()=>this.loader.dismiss(),2000);
                 this.nav.setRoot(PeoplePage,emps);
             }
             else{
-              this.loader.dismiss();
+              setTimeout(()=>this.loader.dismiss(),2000);
             }
         }, (error) => {
-          this.loader.dismiss();
+          setTimeout(()=>this.loader.dismiss(),2000);
             this.nav.setRoot(PeoplePage,this.employees);
             console.log("ERROR: " + JSON.stringify(error));
         });
