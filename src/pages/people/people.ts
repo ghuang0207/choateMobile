@@ -10,18 +10,6 @@ import { NavController, NavParams, MenuController,LoadingController } from 'ioni
   //providers:[AppService]
 })
 export class PeoplePage {
-    items = [
-        {
-            Name:"Aditya",
-            JobTitle: "Software Developer Co-op",
-            Extension: "4007"
-        }, 
-        {
-            Name:"George",
-            JobTitle: "Software Architect",
-            Extension: ""
-        }
-        ];
         searchTerm: string = "";
         allEmployees:any = [];
         employees: any = [];
@@ -62,7 +50,6 @@ export class PeoplePage {
     public assignPerson(){
         
         this.person = this.appService.profile;
-        console.log(this.person);
         if(this.appService.profileLoaded == true){
             this.profileLoaded = true;
             // When error from service look at Local storage
