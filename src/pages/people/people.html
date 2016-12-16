@@ -29,6 +29,7 @@
             <ion-card-content>
                 <ion-item-sliding #SlideItem>
                     <ion-item>
+                        
                         <ion-thumbnail item-left>
                             <img *ngIf="item.hasPhoto == 1" src="https://azlabchoatestore.blob.core.windows.net/person-photo/{{item.tkid}}.jpg" onError="this.onerror=null;this.src='assets/images/noPhoto.jpg'"/> 
                             <img *ngIf="item.hasPhoto == 0" src="assets/images/noPhoto.jpg"/> 

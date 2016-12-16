@@ -18,18 +18,21 @@ export class PeoplePage {
         loader:any;
         hasFavorites: boolean = true;
         allEmployeeLength:number = 0;
-        person: any;
+        person: any; // this is used to see if the user is authenticated
         personTimer : any;
         profileLoaded: boolean=false;
         peopleTimer : any;
         peopleLoaded: boolean=false;
 
   constructor(private menuCtrl: MenuController, public storage:Storage ,public navCtrl: NavController, public appService: AppService, private navParams: NavParams, public loadingCtrl:LoadingController ) {
+      
+      // navParams.data is the employee list passed-in via setroot
       if (navParams.data.length){
+
         if(navParams.data.length > 0){
-            this.employees = navParams.data;
-            this.allEmployees = navParams.data;
-            this.hasFavorites = true;    
+            this.employees = navParams.data;  // this list is the view (this will be filtered)
+            this.allEmployees = navParams.data; // to keep copy of the original array
+            this.hasFavorites = true; // show/hide the text for no data.   
         }
             
         else{
@@ -41,20 +44,26 @@ export class PeoplePage {
           this.employees= [];
           this.hasFavorites = false;
       }
-        this.personTimer = setInterval(()=> this.assignPerson(),2000);
-        this.peopleTimer = setInterval(()=> this.assignPeople(),2000);
+      // assignPerson is the function to load profile
+      this.personTimer = setInterval(()=> this.assignPerson(),2000);
+        //this.peopleTimer = setInterval(()=> this.assignPeople(),2000);
         //appService.getPeopleLogin().subscribe(res=>{console.log(res);this.person=res;})
         
     }
     
+    // load profile -- to see if this person is authenticated
     public assignPerson(){
-        
+        // get the profile 
+        // check the service to see if the profile is loaded thru http
         this.person = this.appService.profile;
         if(this.appService.profileLoaded == true){
             this.profileLoaded = true;
-            // When error from service look at Local storage
-            if (!this.person)
+            
+
+            if (!this.person) // 
             {
+                // if the service sets appService.profile as null, meaning offline
+                // When offline, look at Local storage
                 this.person= {};
                 this.storage.get("fullName").then((val)=>this.person.fullName = val);
                 this.storage.get("department").then((val)=>this.person.department = val);
@@ -62,7 +71,7 @@ export class PeoplePage {
                 this.storage.get("extension").then((val)=>this.person.extension=val);
                 this.storage.get("jobTitle").then((val)=>this.person.jobTitle=val);
                 this.storage.get("hasPhoto").then((val)=>this.person.hasPhoto = val);
-                this.appService.profile = this.person;
+                this.appService.profile = this.person; // pull profile from sql and set back to the profile in appService
             }
             //When no profile update local storage to null
             else if(this.person == "no profile"){
@@ -73,6 +82,8 @@ export class PeoplePage {
                 this.storage.set('tkid',null);
                 this.storage.set('hasPhoto',null);
                 this.person = null;
+
+                
             }
             //When service returns value update local storage with new values
             else{
@@ -92,6 +103,7 @@ export class PeoplePage {
         clearInterval(this.personTimer);
     }
 
+    // load the emp array --- this is to get the employee counts
     public assignPeople(){
         
         //this.person = this.appService.profile;
@@ -106,7 +118,7 @@ export class PeoplePage {
         clearInterval(this.peopleTimer);
     }
 
-
+   /* retired
      public doRefresh(refresher) {
             console.log('Begin async operation', refresher);
             let db = new SQLite();            
@@ -156,8 +168,9 @@ export class PeoplePage {
                 });
 
   }
+  */
 
-
+    // search the list on the same page
     public search(val){
         if(val.length > 0){
             this.employees = this.allEmployees.filter(item => item.fullName.indexOf(val)>=0);
@@ -167,6 +180,7 @@ export class PeoplePage {
             this.employees = this.allEmployees;
         }
     }
+    // toggle favorites on the presenting page
     favorite(item){
         this.appService.toggleFavorite(item);
         
@@ -174,7 +188,7 @@ export class PeoplePage {
     }
 
 
-
+   // make phone call
     call(number){
         let tempNumber: string = number;
         if (tempNumber.length > 0){

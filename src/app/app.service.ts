@@ -15,12 +15,11 @@ export class AppService {
     employees : any = [];
     public allEmployees : any = [];
     public device: any;
-    public db:Promise<any>;
     //Initialize the logged in user
     constructor(private http: Http, public storage: Storage) {
     }
     
-    // by george - for reference
+    // defination for fetching data from api
     private url:string = 'http://azlabchoate20160421.azurewebsites.net/api/person';
     private data: any;
     private observable: Observable<any>;
@@ -37,19 +36,28 @@ export class AppService {
     public database: SQLite = null;
     public favoritPeople: any = [];
 
+    // this function will fetch profile thru http ONLY
+    // call this when online
     public getLoginProfile(uuid){
         console.log("geting profile");
         this.profile = this.http.get(this.profileUrl+uuid).subscribe(response =>  {
             this.profile = response.json();
             this.profileLoaded = true;
+
+            if(this.profile == "no profile"){
+            // todo: delete all the data from database
+            }
           },
           (err)=>{console.log("error thrown");this.profile=null;this.profileLoaded = true;console.log(err);});
     }
 
+// grab all the emp from sql and push them into the local emp array for displaying
     public setAllEmployees(){
         let db = new SQLite();
         db.openDatabase({name: "data.db", location: "default"}).then(() => {
-                db.executeSql("SELECT people.*,favorites.tkid as fav FROM people LEFT JOIN favorites on people.tkid=favorites.tkid", []).then((data) => {
+                db.executeSql(`SELECT people.*,favorites.tkid as fav 
+                FROM people 
+                LEFT JOIN favorites on people.tkid=favorites.tkid`, []).then((data) => {
                 console.log(data);
                 if(data.rows.length > 0) {
                     let emps=[];
@@ -80,14 +88,6 @@ export class AppService {
 
     }
 
-    public getDB(){
-        return this.db;
-    }
-
-    public setDB(db){
-        this.db = db;
-    }
-
     public getAllEmployees(){
         return this.allEmployees;
     }
@@ -108,7 +108,7 @@ export class AppService {
         auditInfo["Serial"] = this.device.serial;
         auditInfo["OSVersion"] = this.device.version;
         auditInfo["AppVersion"] = this.device.appversion;
-        //Call the post
+        //Call the post for audit.
         this.http.post(this.profileUrl,auditInfo).subscribe((res) =>{
                 console.log("Audit Success");
         },(err)=>{console.log("Audit Error");console.log(err)});
@@ -148,20 +148,13 @@ export class AppService {
         });
     }
 
-    public removePersonFromFavorit(tkid){
-        /*if(this.database==null){
-          this.InitSQLite();
-        }
-        this.database.executeSql("DELETE FROM people WHERE tkid = (tkid)", []).then((data) => {
-            console.log("removed: " + JSON.stringify(data));
-        }, (error) => {
-            console.log("ERROR: " + JSON.stringify(error.err));
-        });*/
-    }
+
 
     // end SQLite section for favorit contacts
 
+    // main function to get data from api
     public getPeople() {
+        // if the data was loaded, get from cached data
       if(this.data) {
         // if `data` is available just return it as `Observable`
         console.log("data from cached data");
@@ -174,6 +167,7 @@ export class AppService {
       } else {
         
         // create the request, store the `Observable` for subsequent subscribers
+        // get data from api, if not loaded before
         this.observable = this.http.get(this.url)
         .map(response =>  {
           // when the cached data is available we don't need the `Observable` reference anymore
@@ -195,6 +189,7 @@ export class AppService {
     }
 
     // Function dependent on getPeople.
+    /* retired
     public getDepartmentMembers(deptCode:string){
       
       let tempEmployees = [];
@@ -205,4 +200,6 @@ export class AppService {
         });
       return tempEmployees;
     }
+  */
+    
 }
